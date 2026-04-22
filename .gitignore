@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+venv/
+.venv/
+env/
+__pycache__/
+*.pyc
+
+# Build outputs
+dist/
+release/
+build/
+*.spec
+frontend/backend-bin/
+
+# Environment
+.env
+.DS_Store
+.vscode/
+.idea/
+
+# Electron logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
