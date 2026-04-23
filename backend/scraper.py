@@ -22,19 +22,25 @@ def clean_and_extract(html, source_url):
     text = soup.get_text(separator=' ')
 
     # Emails
-    email_regex = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+    email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
     emails = set(re.findall(email_regex, text))
-    emails = {e.lower() for e in emails if not e.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.js', '.css'))}
+    emails = {e.lower() for e in emails if not e.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.js', '.css', '.woff', '.ttf'))}
 
     # Phones (Improved Regex for French and International formats)
     phones = set()
     
-    # 1. Look for 'tel:' links
+    # 1. Look for 'mailto:' & 'tel:' links
     for a in soup.find_all('a', href=True):
-        if a['href'].startswith('tel:'):
-            p = a['href'].replace('tel:', '').strip()
+        href_val = a['href'].lower().strip()
+        if href_val.startswith('tel:'):
+            p = href_val.replace('tel:', '').strip()
             if len(re.sub(r'\D', '', p)) >= 10:
                 phones.add(p)
+        elif href_val.startswith('mailto:'):
+            # Extract email from mailto
+            e = href_val.replace('mailto:', '').split('?')[0].strip()
+            if '@' in e and '.' in e:
+                emails.add(e.lower())
 
     # 2. Advanced Regex
     # Matches patterns like: +33 1 23 45 67 89, 06.12.34.56.78, 01-23-45-67-89, etc.
@@ -68,7 +74,7 @@ def clean_and_extract(html, source_url):
     # Socials & Links
     social_links = {}
     contact_links = []
-    social_platforms = ['instagram.com', 'facebook.com', 'twitter.com', 'linkedin.com', 'pinterest.com', 'youtube.com', 'tiktok.com']
+    social_platforms = ['instagram.com', 'facebook.com', 'twitter.com', 'x.com', 'linkedin.com', 'pinterest.com', 'youtube.com', 'tiktok.com']
     
     for a in soup.find_all('a', href=True):
         href = a['href'].lower()
@@ -76,15 +82,22 @@ def clean_and_extract(html, source_url):
         for platform in social_platforms:
             if platform in href:
                 plat_name = platform.split('.')[0]
+                if plat_name == 'x': plat_name = 'twitter'
                 if plat_name not in social_links:
                     social_links[plat_name] = full_url
-        if any(keyword in href for keyword in ['contact', 'about', 'propos', 'mentions', 'legal', 'info']):
+        if any(keyword in href for keyword in ['contact', 'about', 'propos', 'mentions', 'legal', 'info', 'politique', 'privacy', 'confidentialite', 'terms', 'conditions', 'shipping', 'livraison', 'expedition', 'sav', 'support', 'help', 'aide']):
             contact_links.append(full_url)
             
     return name, emails, phones, social_links, list(set(contact_links))
 
 async def scrape_store(url: str) -> StoreInfo:
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"}
+    url = url.strip()
+    if not url.startswith('http'):
+        url = 'https://' + url
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+    }
     base_domain = urlparse(url).netloc
     
     all_emails = set()
@@ -104,10 +117,12 @@ async def scrape_store(url: str) -> StoreInfo:
             if name: store_name = name
 
             # Filter and prioritize contacts
-            # We only want internal links to avoid leaving the site
+            # We want internal links and subdomains (like service.domain.com)
+            root_domain = base_domain.replace('www.', '')
             internal_contacts = []
             for link in contacts:
-                if urlparse(link).netloc == base_domain and link.rstrip('/') not in visited:
+                link_netloc = urlparse(link).netloc
+                if (link_netloc == root_domain or link_netloc.endswith('.' + root_domain)) and link.rstrip('/') not in visited:
                     internal_contacts.append(link)
             
             # Visit up to 8 most relevant subpages
