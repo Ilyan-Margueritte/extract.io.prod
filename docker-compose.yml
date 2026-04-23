@@ -1,0 +1,74 @@
+name: extract-io
+
+services:
+  backend:
+    image: lerapt0r/extract-io-backend:latest
+    container_name: extract-io-backend
+    restart: unless-stopped
+    cap_add:
+      - SYS_ADMIN
+    x-casaos:
+      envs: []
+      volumes: []
+      ports: []
+
+  frontend:
+    image: lerapt0r/extract-io-frontend:latest
+    container_name: extract-io-frontend
+    restart: unless-stopped
+    ports:
+      - target: 80
+        published: "7842"
+        protocol: tcp
+    depends_on:
+      - backend
+    x-casaos:
+      ports:
+        - container: "80"
+          description:
+            en_us: WebUI Port
+
+x-casaos:
+  architectures:
+    - amd64
+  main: frontend
+  author: lerapt0r
+  category: Productivity
+  description:
+    en_us: |
+      Extract.io is a powerful hybrid contact scraper built for e-commerce professionals.
+
+      It automatically extracts email addresses, phone numbers, and social media links from any e-commerce website. The hybrid engine uses a fast HTTP crawler first, and falls back to a full Playwright browser for JavaScript-heavy sites.
+
+      Features:
+      - Single URL scan and Bulk scan mode
+      - Multi-page crawl (contact, about, legal pages)
+      - Social media link detection (Instagram, Facebook, TikTok, etc.)
+      - One-click CSV export
+      - Clean, modern dark interface
+    fr_fr: |
+      Extract.io est un outil d'extraction de contacts hybride conçu pour les professionnels du e-commerce.
+
+      Il extrait automatiquement les emails, numéros de téléphone et liens de réseaux sociaux depuis n'importe quel site e-commerce. Le moteur hybride utilise d'abord un crawler HTTP rapide, puis bascule sur Playwright pour les sites JavaScript.
+
+      Fonctionnalités :
+      - Scan URL unique et mode Bulk
+      - Crawl multi-pages (contact, mentions légales, etc.)
+      - Détection des réseaux sociaux
+      - Export CSV en un clic
+      - Interface sombre moderne
+  developer: Ilyan Margueritte
+  icon: https://raw.githubusercontent.com/Ilyan-Margueritte/Extract.io/main/casaos/icon.png
+  tagline:
+    en_us: Hybrid contact extractor for e-commerce
+    fr_fr: Extracteur de contacts hybride pour le e-commerce
+  title:
+    en_us: Extract.io
+  index: /
+  port_map: "7842"
+  tips:
+    before_install:
+      en_us: |
+        The first startup may take 1-2 minutes while the Playwright browser engine initializes.
+      fr_fr: |
+        Le premier démarrage peut prendre 1-2 minutes le temps que le moteur de navigation Playwright s'initialise.

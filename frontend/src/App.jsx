@@ -9,7 +9,8 @@ import {
   ArrowRight
 } from 'lucide-react';
 
-const API_URL = 'http://localhost:8000';
+// Use /api for Docker/Nginx proxy, or localhost for local dev/Electron
+const API_URL = import.meta.env.DEV ? 'http://127.0.0.1:8000' : '/api';
 
 function SocialLink({ platform, href }) {
   const icons = {

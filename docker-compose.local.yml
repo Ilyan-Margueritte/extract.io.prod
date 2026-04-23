@@ -1,0 +1,24 @@
+name: extract-io-local
+
+services:
+  backend:
+    build:
+      context: ./backend
+    image: extract-io-backend:local
+    container_name: extract-io-backend
+    restart: unless-stopped
+    cap_add:
+      - SYS_ADMIN
+
+  frontend:
+    build:
+      context: ./frontend
+    image: extract-io-frontend:local
+    container_name: extract-io-frontend
+    restart: unless-stopped
+    ports:
+      - target: 80
+        published: "7842"
+        protocol: tcp
+    depends_on:
+      - backend

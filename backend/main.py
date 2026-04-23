@@ -61,5 +61,7 @@ async def scrape_bulk_endpoint(request: BulkScrapeRequest):
     return results
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    import multiprocessing
+    multiprocessing.freeze_support() # Important when running Pyinstaller on Mac/Windows/Linux just in case
+    uvicorn.run(app, host="127.0.0.1", port=8000)
 

@@ -1,6 +1,9 @@
 {
   "name": "extract-io",
   "productName": "Extract.io",
+  "description": "Powerful hybrid contact scraper for e-commerce stores.",
+  "author": "Ilyan Margueritte",
+  "homepage": "https://github.com/Ilyan-Margueritte/Extract.io",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -11,14 +14,24 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "electron:dev": "cross-env NODE_ENV=development concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron:build:mac": "npm run build && electron-builder --mac"
+    "electron:build:mac": "npm run build && electron-builder --mac",
+    "electron:build:linux": "npm run build && electron-builder --linux"
   },
   "build": {
     "appId": "com.extract.io",
     "productName": "Extract.io",
     "mac": {
       "category": "public.app-category.productivity",
-      "target": ["zip"]
+      "target": [
+        "zip"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Office"
     },
     "directories": {
       "output": "release"
@@ -31,7 +44,9 @@
       {
         "from": "backend-bin",
         "to": "backend-bin",
-        "filter": ["**/*"]
+        "filter": [
+          "**/*"
+        ]
       }
     ]
   },
@@ -59,4 +74,3 @@
     "wait-on": "^7.2.0"
   }
 }
-

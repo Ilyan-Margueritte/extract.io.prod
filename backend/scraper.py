@@ -132,7 +132,7 @@ async def scrape_store(url: str) -> StoreInfo:
     # --- PHASE 2: Deep crawl with Playwright (if info still missing) ---
     async with async_playwright() as p:
         try:
-            browser = await p.chromium.launch(headless=True)
+            browser = await p.chromium.launch(headless=True, args=['--no-sandbox'])
             context = await browser.new_context(user_agent=headers["User-Agent"])
             page = await context.new_page()
             
