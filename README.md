@@ -1,18 +1,23 @@
 # Extract.io 🚀
 
-**Extract.io** est l'outil ultime pour extraire les données de contact (Emails, Téléphones, Réseaux Sociaux) des boutiques e-commerce en quelques secondes.
+**Extract.io** est un outil professionnel hybride conçu pour extraire les données de contact (Emails, Téléphones, Réseaux Sociaux) des sites e-commerce en quelques secondes. Il combine la puissance d'un crawler HTTP ultra-rapide et d'un navigateur automatisé (Playwright) pour contourner les protections.
 
 ---
 
-## 🛠 Prérequis
+## ✨ Fonctionnalités
 
-Avant de commencer, assurez-vous d'avoir installé sur votre machine :
-- **Python 3.10+**
-- **Node.js 18+** & **npm**
+- 🔍 **Scan Hybride** : Utilise d'abord un moteur ultra-léger, puis bascule sur un navigateur réel pour les sites complexes (JavaScript).
+- 📧 **Extraction Profonde** : Analyse automatiquement les pages de contact, mentions légales, politiques de confidentialité et d'expédition.
+- 📱 **Détection Multi-Plateforme** : Récupère les liens Instagram, Facebook, TikTok, LinkedIn, YouTube, Pinterest et X (Twitter).
+- 📂 **Mode Bulk (Vrac)** : Scannez des listes entières de sites en un seul clic.
+- 📊 **Export CSV** : Exportez vos leads instantanément pour vos campagnes marketing.
+- 🐋 **Docker Ready** : Déploiement en 1 minute sur n'importe quel VPS ou via CasaOS.
 
 ---
 
-## 📥 Installation
+## 🚀 Installation Rapide (Docker)
+
+La méthode recommandée est d'utiliser Docker pour éviter toute installation complexe de Python ou de navigateurs.
 
 ### 1. Cloner le dépôt
 ```bash
@@ -20,68 +25,56 @@ git clone https://github.com/Ilyan-Margueritte/Extract.io.git
 cd Extract.io
 ```
 
-### 2. Configurer le Backend
+### 2. Lancer l'application
+```bash
+docker compose -f docker-compose.local.yml up -d --build
+```
+L'interface sera alors accessible sur : `http://localhost:7842`
+
+---
+
+## 🏠 Déploiement sur CasaOS / VPS Hostinger
+
+Extract.io est optimisé pour être utilisé sur un serveur distant.
+
+1. Connectez-vous à votre VPS.
+2. Clonez le projet.
+3. Lancez la commande Docker ci-dessus.
+4. **CasaOS** détectera automatiquement les containers et les affichera sur votre tableau de bord grâce aux métadonnées `x-casaos`.
+
+> [!IMPORTANT]
+> N'oubliez pas d'ouvrir le port `7842` dans le pare-feu de votre VPS.
+
+---
+
+## 🛠 Structure du Projet
+
+- `/backend` : API FastAPI et moteur de scraping hybride (Requests + Playwright).
+- `/frontend` : Interface React Moderne avec Vite et Framer Motion pour les animations.
+- `docker-compose.local.yml` : Configuration pour la compilation locale simplifiée.
+
+---
+
+## 🏗 Développement Local (Sans Docker)
+
+Si vous souhaitez modifier le code, vous pouvez lancer les services séparément :
+
+**Backend :**
 ```bash
 cd backend
-python -m venv venv
-source venv/bin/activate  # Sur Windows: venv\Scripts\activate
+python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 playwright install chromium
-cd ..
+uvicorn main:app --reload
 ```
 
-### 3. Configurer le Frontend
+**Frontend :**
 ```bash
 cd frontend
 npm install
-cd ..
+npm run dev
 ```
 
 ---
 
-## 🚀 Utilisation (Mode Développement)
-
-Pour lancer l'application en local :
-
-1. **Lancer le serveur backend** :
-   ```bash
-   cd backend
-   source venv/bin/activate
-   uvicorn main:app --port 8000
-   ```
-
-2. **Lancer l'interface bureau (Electron)** :
-   ```bash
-   cd frontend
-   npm run electron:dev
-   ```
-
----
-
-## 🍏 Créer l'application macOS (.app)
-
-Pour générer une application autonome qui lance automatiquement le moteur et l'interface au double-clic :
-
-1. Assurez-vous d'être sur un **ordinateur macOS**.
-2. À la racine du projet, rendez le script de build exécutable :
-   ```bash
-   chmod +x build_mac.sh
-   ```
-3. Lancez la compilation :
-   ```bash
-   ./build_mac.sh
-   ```
-
-Une fois terminé, vous trouverez votre fichier d'installation dans :
-`frontend/release/Extract.io-1.0.0-mac.zip`
-
----
-
-## 📁 Structure du projet
-- `/backend` : API FastAPI et moteur de scraping hybride (Requests + Playwright).
-- `/frontend` : Interface React (Vite) avec intégration Electron pour le bureau.
-- `build_mac.sh` : Script d'automatisation pour la compilation macOS.
-
----
-
-Extract.io est conçu pour être rapide, sûr et efficace. 🚀
+Dévéloppé avec ❤️ par **Ilyan Margueritte**. Extract.io est conçu pour être rapide, sûr et efficace. 🚀
