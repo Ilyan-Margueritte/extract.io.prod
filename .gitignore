@@ -18,6 +18,12 @@ frontend/backend-bin/
 .DS_Store
 .vscode/
 .idea/
+.claude/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
 
 # Electron logs
 *.log

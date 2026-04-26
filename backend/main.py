@@ -1,67 +1,147 @@
-from fastapi import FastAPI, HTTPException
+"""
+Extract.io SaaS - Main FastAPI Application
+"""
+import os
+from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from scraper import scrape_store, StoreInfo
-from typing import List
-import asyncio
-import uvicorn
+from fastapi.responses import JSONResponse
+from contextlib import asynccontextmanager
+import time
+import logging
+from dotenv import load_dotenv
 
-app = FastAPI(title="Store Scraper API")
+# Load environment variables
+load_dotenv()
 
-# Enable CORS for frontend
+# Validation des variables d'environnement critiques
+REQUIRED_ENV_VARS = [
+    "CLERK_PUBLIC_KEY",
+    "STRIPE_SECRET_KEY",
+    "STRIPE_WEBHOOK_SECRET",
+    "API_KEY_PEPPER",
+    "DATABASE_URL",
+]
+for var in REQUIRED_ENV_VARS:
+    if not os.getenv(var):
+        raise RuntimeError(f"Variable d'environnement manquante : {var}")
+
+from database import engine, Base, get_db
+from sqlalchemy.orm import Session
+from models import User
+from api import auth as auth_router, users, dashboard, api_keys, scrape, billing
+from auth import get_authenticated_user
+from scraper import StoreInfo
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Startup and shutdown events"""
+    # Startup: Create database tables
+    logger.info("Creating database tables...")
+    Base.metadata.create_all(bind=engine)
+    logger.info("Database tables created successfully")
+    yield
+    # Shutdown: Cleanup if needed
+    logger.info("Shutting down...")
+
+
+app = FastAPI(
+    title="Extract.io API",
+    description="SaaS API for contact extraction from e-commerce websites",
+    version="2.0.0",
+    lifespan=lifespan
+)
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """Log all requests and their duration"""
+    start_time = time.time()
+    response = await call_next(request)
+    duration = time.time() - start_time
+    logger.info(f"{request.method} {request.url.path} - {response.status_code} - {duration:.3f}s")
+    return response
+
+# Enable CORS for frontend (Must be outermost middleware)
+allowed_origins_raw = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173")
+allowed_origins = [origin.strip() for origin in allowed_origins_raw.split(",")]
+logger.info(f"CORS Allowed Origins: {allowed_origins}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-class ScrapeRequest(BaseModel):
-    url: str
+# CORS is already handled by CORSMiddleware above. 
+# Removing dynamic force_cors_middleware for security.
 
-class BulkScrapeRequest(BaseModel):
-    urls: List[str]
 
-def format_url(url: str):
-    url = url.strip()
-    if not url:
-        return None
-    if not url.startswith(("http://", "https://")):
-        url = "https://" + url
-    return url
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Global exception handler"""
+    logger.error(f"Unhandled error: {str(exc)}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error"}
+    )
 
+
+# Include routers
+app.include_router(auth_router.router, prefix="/api/v1")
+app.include_router(users.router, prefix="/api/v1")
+app.include_router(dashboard.router, prefix="/api/v1")
+app.include_router(api_keys.router, prefix="/api/v1")
+app.include_router(scrape.router, prefix="/api/v1")
+app.include_router(billing.router, prefix="/api/v1")
+
+
+# Legacy endpoints (for backward compatibility) - NOW PROTECTED
 @app.post("/scrape", response_model=StoreInfo)
-async def scrape_endpoint(request: ScrapeRequest):
-    url = format_url(request.url)
-    if not url:
-        raise HTTPException(status_code=400, detail="URL invalide")
-    
-    try:
-        result = await scrape_store(url)
-        return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+async def legacy_scrape_endpoint(
+    request: scrape.ScrapeRequest,
+    user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db)
+):
+    """Legacy scrape endpoint (will be deprecated)"""
+    return await scrape.create_scrape_job(request=request, user=user, db=db)
 
-@app.post("/scrape-bulk", response_model=List[StoreInfo])
-async def scrape_bulk_endpoint(request: BulkScrapeRequest):
-    urls = [format_url(url) for url in request.urls if format_url(url)]
-    if not urls:
-        raise HTTPException(status_code=400, detail="Aucune URL valide fournie")
-    
-    # Limit concurrency to avoid being blocked or overloading
-    semaphore = asyncio.Semaphore(5)
-    
-    async def limited_scrape(url):
-        async with semaphore:
-            return await scrape_store(url)
-    
-    tasks = [limited_scrape(url) for url in urls]
-    results = await asyncio.gather(*tasks)
-    return results
+@app.post("/scrape-bulk", response_model=list[StoreInfo])
+async def legacy_scrape_bulk_endpoint(
+    request: scrape.BulkScrapeRequest,
+    user: User = Depends(get_authenticated_user),
+    db: Session = Depends(get_db)
+):
+    """Legacy bulk scrape endpoint (will be deprecated)"""
+    return await scrape.create_bulk_scrape_jobs(urls=request.urls, user=user, db=db)
+
+
+@app.get("/")
+async def root():
+    """API health check"""
+    return {
+        "name": "Extract.io API",
+        "version": "2.0.0",
+        "status": "running"
+    }
+
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return {"status": "healthy"}
+
 
 if __name__ == "__main__":
     import multiprocessing
-    multiprocessing.freeze_support() # Important when running Pyinstaller on Mac/Windows/Linux just in case
-    uvicorn.run(app, host="127.0.0.1", port=8000)
-
+    multiprocessing.freeze_support()
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

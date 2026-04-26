@@ -4,8 +4,31 @@ import requests
 from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
 from pydantic import BaseModel
+import socket
+import ipaddress
+from fastapi import HTTPException
 from typing import List, Optional, Set, Dict
 from urllib.parse import urljoin, urlparse
+
+def is_safe_ip(ip: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
+    """Check if an IP address is safe to connect to (not private/reserved)"""
+    return not (ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_multicast or ip.is_unspecified)
+
+# --- SÉCURITÉ : Patch contre l'enchaînement SSRF & DNS Rebinding ---
+# Cela valide l'IP au moment de la vraie connexion TCP, après résolution DNS finale.
+_orig_connect = socket.socket.connect
+
+def _safe_connect(self, address):
+    host = address[0]
+    try:
+        ip = ipaddress.ip_address(host)
+        if not is_safe_ip(ip):
+            raise ConnectionRefusedError(f"SSRF bloqué : IP privée {host}")
+    except ValueError:
+        pass
+    return _orig_connect(self, address)
+
+socket.socket.connect = _safe_connect
 
 class StoreInfo(BaseModel):
     name: Optional[str] = None
@@ -90,10 +113,38 @@ def clean_and_extract(html, source_url):
             
     return name, emails, phones, social_links, list(set(contact_links))
 
+def validate_url(url: str) -> tuple[str, str]:
+    """Validate URL and return (hostname, resolved_ip) if safe"""
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        raise HTTPException(status_code=400, detail="Invalid URL scheme. Only http and https are allowed.")
+
+    hostname = parsed.hostname
+    if not hostname:
+        raise HTTPException(status_code=400, detail="Invalid URL hostname.")
+
+    try:
+        # Resolve hostname to IP
+        ip_address = socket.gethostbyname(hostname)
+        ip = ipaddress.ip_address(ip_address)
+
+        # Check if IP is private/reserved
+        if not is_safe_ip(ip):
+            raise HTTPException(status_code=400, detail="Access to private or reserved IP addresses is not allowed.")
+
+        return hostname, ip_address
+    except socket.gaierror:
+        raise HTTPException(status_code=400, detail="Could not resolve hostname.")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid IP address.")
+
 async def scrape_store(url: str) -> StoreInfo:
     url = url.strip()
     if not url.startswith('http'):
         url = 'https://' + url
+
+    # SSRF Validation - get resolved IP for later verification
+    hostname, resolved_ip = validate_url(url)
 
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
@@ -147,16 +198,48 @@ async def scrape_store(url: str) -> StoreInfo:
     # --- PHASE 2: Deep crawl with Playwright (if info still missing) ---
     async with async_playwright() as p:
         try:
+            # --no-sandbox : nécessaire en environnement serveur Linux
+            # Tradeoff accepté : le scraping tourne dans un process isolé
+            # Ne pas retirer sans tester la compatibilité serveur
             browser = await p.chromium.launch(headless=True, args=['--no-sandbox'])
+
+            # Create context with request interception to prevent SSRF via DNS rebinding
             context = await browser.new_context(user_agent=headers["User-Agent"])
             page = await context.new_page()
-            
+
+            # Intercept all requests to verify destination IP (prevents DNS rebinding attacks)
+            dns_cache = {}
+
+            async def handle_route(route):
+                request_url = route.request.url
+                try:
+                    parsed = urlparse(request_url)
+                    req_hostname = parsed.hostname
+                    if req_hostname:
+                        # DNS Cache to avoid redundant lookups
+                        if req_hostname not in dns_cache:
+                            dns_cache[req_hostname] = socket.gethostbyname(req_hostname)
+                        
+                        req_ip = dns_cache[req_hostname]
+                        
+                        if not is_safe_ip(ipaddress.ip_address(req_ip)):
+                            # Block request to private/reserved IP
+                            await route.abort()
+                            return
+                except Exception:
+                    # On any error resolving/verifying, block the request
+                    await route.abort()
+                    return
+                await route.continue_()
+
+            await context.route("**", handle_route)
+
             await page.goto(url, wait_until="domcontentloaded", timeout=20000)
             await asyncio.sleep(2)
-            
+
             content = await page.content()
             name, emails, phones, socials, contacts = clean_and_extract(content, url)
-            
+
             all_emails.update(emails)
             all_phones.update(phones)
             all_socials.update(socials)
