@@ -51,6 +51,7 @@ services:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
+    env_file: .env
     depends_on:
       - frontend
 
