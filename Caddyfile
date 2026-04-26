@@ -1,0 +1,21 @@
+{
+    email {$EMAIL}
+}
+
+{$DOMAIN} {
+    # Reverse proxy to frontend
+    reverse_proxy frontend:80
+
+    # API endpoints redirection
+    handle_path /api/* {
+        reverse_proxy backend:8000
+    }
+
+    # Optional: Clerk Webhooks if needed
+    handle_path /webhooks/* {
+        reverse_proxy backend:8000
+    }
+
+    # Better compression
+    encode gzip zstd
+}
