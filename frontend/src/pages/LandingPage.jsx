@@ -131,18 +131,7 @@ export default function LandingPage() {
   const { user } = useUser();
   const { openSignIn } = useClerk();
 
-  React.useEffect(() => {
-    // Si l'utilisateur est chargé et connecté
-    if (isLoaded && isSignedIn && user) {
-      const plan = user.publicMetadata?.plan;
-      // Redirection immédiate vers pricing s'il n'est pas PREMIUM
-      if (plan !== 'premium' && plan !== 'PREMIUM') {
-        navigate('/pricing');
-      } else {
-        navigate('/dashboard');
-      }
-    }
-  }, [isLoaded, isSignedIn, user, navigate]);
+  // User stays on Landing Page even if logged in, buttons will adapt (Dashboard/Upgrade)
 
   const handleCTA = () => {
     if (isSignedIn) {
