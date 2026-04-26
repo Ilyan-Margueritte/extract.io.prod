@@ -107,7 +107,7 @@ function AppRoutes() {
         path="/login/*"
         element={
           <AuthLayout>
-            <SignIn routing="path" path="/login" signUpUrl="/register" afterSignInUrl="/pricing" appearance={{ baseTheme: dark }} />
+            <SignIn routing="path" path="/login" signUpUrl="/register" fallbackRedirectUrl="/pricing" appearance={{ baseTheme: dark }} />
           </AuthLayout>
         }
       />
@@ -116,7 +116,7 @@ function AppRoutes() {
         path="/register/*"
         element={
           <AuthLayout>
-            <SignUp routing="path" path="/register" signInUrl="/login" afterSignUpUrl="/pricing" appearance={{ baseTheme: dark }} />
+            <SignUp routing="path" path="/register" signInUrl="/login" fallbackRedirectUrl="/pricing" appearance={{ baseTheme: dark }} />
           </AuthLayout>
         }
       />
