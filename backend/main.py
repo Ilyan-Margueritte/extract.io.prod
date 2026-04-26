@@ -96,12 +96,12 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 
 # Include routers
-app.include_router(auth_router.router, prefix="/api/v1")
-app.include_router(users.router, prefix="/api/v1")
-app.include_router(dashboard.router, prefix="/api/v1")
-app.include_router(api_keys.router, prefix="/api/v1")
-app.include_router(scrape.router, prefix="/api/v1")
-app.include_router(billing.router, prefix="/api/v1")
+app.include_router(auth_router.router, prefix="/v1")
+app.include_router(users.router, prefix="/v1")
+app.include_router(dashboard.router, prefix="/v1")
+app.include_router(api_keys.router, prefix="/v1")
+app.include_router(scrape.router, prefix="/v1")
+app.include_router(billing.router, prefix="/v1")
 
 
 # Legacy endpoints (for backward compatibility) - NOW PROTECTED

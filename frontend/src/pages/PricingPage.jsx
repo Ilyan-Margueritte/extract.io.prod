@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Zap, ArrowRight, Loader2, CreditCard, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, Zap, ArrowRight, Loader2, CreditCard, ShieldCheck, AlertCircle } from 'lucide-react';
 import { useUser, useAuth, useClerk } from '@clerk/clerk-react';
 
 const API_URL = import.meta.env.DEV ? 'http://127.0.0.1:8000' : '/api';
@@ -26,7 +26,7 @@ export default function PricingPage() {
 
       const token = await getToken();
       const response = await axios.post(
-        `${API_URL}/api/v1/billing/create-checkout-session?plan=${plan}`,
+        `${API_URL}/v1/billing/create-checkout-session?plan=${plan}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -45,7 +45,7 @@ export default function PricingPage() {
       setLoading('portal');
       const token = await getToken();
       const response = await axios.post(
-        `${API_URL}/api/v1/billing/create-portal-session`,
+        `${API_URL}/v1/billing/create-portal-session`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
