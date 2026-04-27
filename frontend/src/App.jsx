@@ -241,7 +241,6 @@ export default function App() {
                     type="submit"
                     className="btn btn-primary"
                     disabled={loading || !urlInput.trim()}
-                    style={{ alignSelf: mode === 'bulk' ? 'flex-end' : 'auto', height: mode === 'bulk' ? '44px' : '44px' }}
                   >
                     {loading ? 'Scan...' : 'Extraire'} <ArrowRight size={15} />
                   </button>
