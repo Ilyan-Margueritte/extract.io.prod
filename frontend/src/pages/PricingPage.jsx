@@ -70,7 +70,7 @@ export default function PricingPage() {
             </div>
             <span className="logo__text">Extract.io</span>
           </div>
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div className="topbar__actions">
             {isSignedIn && <button className="btn-premium btn-premium-secondary" style={{ height: '36px', fontSize: '0.85rem' }} onClick={() => (window.location.href = '/dashboard')}>Dashboard</button>}
           </div>
         </div>
