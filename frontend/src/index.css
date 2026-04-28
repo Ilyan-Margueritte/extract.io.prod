@@ -199,7 +199,11 @@ body {
   .container, .container--wide, .container--narrow {
     padding: 0 16px;
   }
+  .hide-mobile {
+    display: none !important;
+  }
 }
+
 
 .container--wide {
   max-width: 1200px;
@@ -1044,12 +1048,42 @@ body {
 
 .heading-hero {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  font-size: clamp(2.25rem, 8vw, 4.5rem);
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.04em;
   margin-bottom: 1.5rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
+
+@media (max-width: 768px) {
+  .heading-hero {
+    font-size: clamp(1.85rem, 10vw, 2.5rem);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.25rem;
+    padding: 0 4px;
+  }
+}
+
+.heading-section {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  letter-spacing: -1px;
+  line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+  .heading-section {
+    font-size: clamp(1.75rem, 8vw, 2.25rem);
+    letter-spacing: -0.5px;
+    margin-bottom: 1rem;
+  }
+}
+
+
 
 /* ─── Buttons Refined ─── */
 .btn-premium {

@@ -165,10 +165,11 @@ export default function LandingPage() {
               V2.0 is now live — Experience the power
             </div>
             <h1 className="heading-hero">
-              Scale your lead gen with <br />
+              Scale your lead gen with <br className="hide-mobile" />
               <span className="text-gradient-primary">Hybrid Extraction</span>
             </h1>
-            <p className="hero__subtitle" style={{ fontSize: '1.25rem', maxWidth: '650px', marginBottom: '2.5rem', color: 'var(--text-secondary)' }}>
+
+            <p className="hero__subtitle" style={{ maxWidth: '650px', marginBottom: '2.5rem', color: 'var(--text-secondary)' }}>
               The most advanced e-commerce contact scraper. Extract emails, phone numbers, and social profiles in seconds from any Shopify, WooCommerce, or custom store.
             </p>
 
@@ -236,7 +237,7 @@ export default function LandingPage() {
         {/* Features Grid */}
         <section id="features" className="container" style={{ padding: '120px 24px' }}>
           <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-1px' }}>Engineered for Results</h2>
+            <h2 className="heading-section">Engineered for Results</h2>
             <p style={{ color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto', fontSize: '1.1rem', lineHeight: 1.7 }}>Everything you need to build high-quality lead lists without the manual work.</p>
           </div>
 
@@ -283,7 +284,7 @@ export default function LandingPage() {
         {/* Pricing Section */}
         <section id="pricing" className="container" style={{ padding: '120px 24px' }}>
           <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-1px' }}>Activate Your Access</h2>
+            <h2 className="heading-section">Activate Your Access</h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', lineHeight: 1.7 }}>Instant one-time access for unlimited extraction power.</p>
           </div>
 
@@ -315,7 +316,7 @@ export default function LandingPage() {
             transition={{ duration: 0.6 }}
           >
             <div style={{ position: 'absolute', top: '-40%', left: '-30%', width: '160%', height: '160%', background: 'radial-gradient(circle, var(--primary-surface-strong) 0%, transparent 50%)', zIndex: -1, filter: 'blur(60px)' }} />
-            <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1.5rem', letterSpacing: '-1px' }}>Ready to skyrocket your sales?</h2>
+            <h2 className="heading-section">Ready to skyrocket your sales?</h2>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem', maxWidth: '500px', margin: '0 auto 2.5rem', fontSize: '1.1rem', lineHeight: 1.7 }}>Join 1,000+ companies using Extract.io to find their next big clients.</p>
             {!isSignedIn ? (
               <button
