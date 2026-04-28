@@ -241,7 +241,20 @@ body {
   align-items: center;
   justify-content: space-between;
   height: 60px;
-  flex-wrap: wrap;
+}
+
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.topbar__actions .nav-link {
+  margin: 0 !important;
+}
+
+.topbar__actions .nav-link::before {
+  display: none !important;
 }
 
 @media (max-width: 768px) {
