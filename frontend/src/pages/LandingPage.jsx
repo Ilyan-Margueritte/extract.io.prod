@@ -33,10 +33,10 @@ const Nav = () => {
           <div className="logo__icon">
             <Zap size={18} color="white" />
           </div>
-          <span className="logo__text" style={{ fontSize: '1.25rem', fontWeight: 700 }}>Extract.io</span>
+          <span className="logo__text" style={{ fontWeight: 700 }}>Extract.io</span>
         </div>
 
-        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+        <div className="topbar__actions">
           <a href="#features" className="nav-link" style={{ margin: 0, padding: '0.5rem', fontSize: '0.9rem' }}>Features</a>
           <a href="#pricing" className="nav-link" style={{ margin: 0, padding: '0.5rem', fontSize: '0.9rem' }}>Pricing</a>
 
@@ -62,14 +62,12 @@ const Nav = () => {
             <>
               <button
                 className="btn-premium btn-premium-secondary"
-                style={{ fontSize: '0.9rem', padding: '0.5rem 1.25rem' }}
                 onClick={handleSignIn}
               >
                 Sign In
               </button>
               <button
                 className="btn-premium btn-premium-primary"
-                style={{ fontSize: '0.9rem', padding: '0.5rem 1.25rem' }}
                 onClick={handleGetStarted}
               >
                 Get Started
