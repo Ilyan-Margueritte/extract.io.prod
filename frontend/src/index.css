@@ -253,17 +253,19 @@ body {
 
 @media (max-width: 480px) {
   .topbar { padding: 0 12px; }
-  .logo__text { font-size: 15px !important; }
-  .logo { gap: 8px !important; }
-  .topbar__inner { height: 56px; }
-  .topbar__actions { gap: 0.5rem !important; }
-  .btn-premium { padding: 0.5rem 1rem !important; font-size: 0.85rem !important; }
+  .logo__text { font-size: 14px !important; }
+  .logo { gap: 6px !important; }
+  .logo__icon { width: 32px !important; height: 32px !important; }
+  .topbar__inner { height: 52px; }
+  .topbar__actions { gap: 0.4rem !important; }
+  .btn-premium { padding: 0.4rem 0.75rem !important; font-size: 0.8rem !important; }
   
-  /* Hide the secondary button (Sign In) on very small screens to prevent overflow */
+  /* Hide the secondary button (Sign In) on mobile to prevent overflow */
   .topbar__actions .btn-premium-secondary {
     display: none !important;
   }
 }
+
 
 
 
