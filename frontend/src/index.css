@@ -1040,12 +1040,38 @@ body {
 /* ─── Footer ─── */
 .footer {
   margin-top: auto;
-  padding: 24px;
-  text-align: center;
+  background: var(--surface-low);
+  padding: 4rem 2rem;
   border-top: 1px solid var(--border);
   color: var(--text-tertiary);
-  font-size: 12px;
 }
+
+.footer__main {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 4rem;
+}
+
+.footer__sections {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem;
+}
+
+@media (max-width: 768px) {
+  .footer {
+    padding: 3rem 1.5rem;
+  }
+  .footer__main {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  .footer__sections {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+}
+
 
 /* ─── Section spacing ─── */
 .section { padding: 0 0 48px; }

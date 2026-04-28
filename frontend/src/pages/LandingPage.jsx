@@ -335,8 +335,8 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="footer" style={{ background: 'var(--surface-low)', padding: '4rem 2rem', borderTop: '1px solid var(--border)' }}>
-        <div className="container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '4rem' }}>
+      <footer className="footer">
+        <div className="container footer__main">
           <div>
             <div className="logo" style={{ marginBottom: '1.25rem' }}>
               <div className="logo__icon" style={{ width: '32px', height: '32px' }}>
@@ -346,7 +346,7 @@ export default function LandingPage() {
             </div>
             <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem', lineHeight: 1.6 }}>The ultimate tool for e-commerce lead generation. Built for modern sales teams.</p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2.5rem' }}>
+          <div className="footer__sections">
             <div>
               <h4 style={{ marginBottom: '1rem', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-primary)' }}>Product</h4>
               <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
