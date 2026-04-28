@@ -171,19 +171,17 @@ export default function LandingPage() {
               The most advanced e-commerce contact scraper. Extract emails, phone numbers, and social profiles in seconds from any Shopify, WooCommerce, or custom store.
             </p>
 
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+            <div className="hero__actions">
               {!isSignedIn ? (
                 <>
                   <button
                     className="btn-premium btn-premium-primary"
-                    style={{ padding: '1rem 2.5rem', fontSize: '1.1rem' }}
                     onClick={() => navigate('/register')}
                   >
                     Get Started <ArrowRight size={20} />
                   </button>
                   <button
                     className="btn-premium btn-premium-secondary"
-                    style={{ padding: '1rem 2.5rem', fontSize: '1.1rem' }}
                   >
                     View Demo
                   </button>
@@ -191,7 +189,6 @@ export default function LandingPage() {
               ) : (
                 <button
                   className="btn-premium btn-premium-primary"
-                  style={{ padding: '1rem 2.5rem', fontSize: '1.1rem' }}
                   onClick={() => navigate('/dashboard')}
                 >
                   Go to Dashboard <ArrowRight size={20} />
@@ -316,23 +313,24 @@ export default function LandingPage() {
             <div style={{ position: 'absolute', top: '-40%', left: '-30%', width: '160%', height: '160%', background: 'radial-gradient(circle, var(--primary-surface-strong) 0%, transparent 50%)', zIndex: -1, filter: 'blur(60px)' }} />
             <h2 className="heading-section">Ready to skyrocket your sales?</h2>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem', maxWidth: '500px', margin: '0 auto 2.5rem', fontSize: '1.1rem', lineHeight: 1.7 }}>Join 1,000+ companies using Extract.io to find their next big clients.</p>
-            {!isSignedIn ? (
-              <button
-                className="btn-premium btn-premium-primary"
-                style={{ padding: '1rem 3rem', fontSize: '1.05rem' }}
-                onClick={handleCTA}
-              >
-                Create Your Account Now
-              </button>
-            ) : (
-              <button
-                className="btn-premium btn-premium-primary"
-                style={{ padding: '1rem 3rem', fontSize: '1.05rem' }}
-                onClick={() => navigate('/dashboard')}
-              >
-                Go to Dashboard
-              </button>
-            )}
+            <div className="hero__actions">
+              {!isSignedIn ? (
+                <button
+                  className="btn-premium btn-premium-primary"
+                  onClick={handleCTA}
+                >
+                  Create Your Account Now
+                </button>
+              ) : (
+                <button
+                  className="btn-premium btn-premium-primary"
+                  onClick={() => navigate('/dashboard')}
+                >
+                  Go to Dashboard
+                </button>
+              )}
+            </div>
+
           </motion.div>
         </section>
       </main>
