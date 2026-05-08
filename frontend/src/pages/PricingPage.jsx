@@ -44,16 +44,13 @@ export default function PricingPage() {
       setError('');
 
       const token = await getToken();
-      const payload = { 
-        plan: `premium_${billingCycle}` 
-      };
+      const params = new URLSearchParams({ plan: `premium_${billingCycle}` });
       if (couponCode.trim()) {
-        payload.coupon_code = couponCode.trim();
+        params.append('coupon_code', couponCode.trim());
       }
-      
       const response = await axios.post(
-        `${API_URL}/v1/billing/create-checkout-session`,
-        payload,
+        `${API_URL}/v1/billing/create-checkout-session?${params}`,
+        {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

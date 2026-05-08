@@ -4,10 +4,9 @@ API Router for Billing and Subscriptions
 import stripe
 import os
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, Request, Header, status, Body
+from fastapi import APIRouter, Depends, HTTPException, Request, Header, status
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
-from pydantic import BaseModel
 
 from database import get_db
 from models import User, Subscription, Invoice
@@ -32,20 +31,14 @@ PLANS = {
     }
 }
 
-class CheckoutSessionRequest(BaseModel):
-    plan: str
-    coupon_code: str = None
-
 @router.post("/create-checkout-session")
 async def create_checkout_session(
-    req: CheckoutSessionRequest,
+    plan: str,
+    coupon_code: str = None,
     user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db)
 ):
     """Create a Stripe Checkout Session for a plan"""
-    plan = req.plan
-    coupon_code = req.coupon_code
-    
     if plan not in PLANS:
         raise HTTPException(status_code=400, detail="Invalid plan")
 
