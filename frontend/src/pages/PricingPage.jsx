@@ -142,73 +142,80 @@ export default function PricingPage() {
             </motion.div>
           </div>
 
-              <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '16px', padding: '1.5rem', border: '1px solid var(--border)', marginBottom: '2.5rem' }}>
-                <ul className="pricing-features" style={{ margin: 0 }}>
-                  {[
-                    'Unlimited Extractions',
-                    'Emails, Phones, Social Profiles',
-                    'Advanced Anti-Bot Scraping Engine',
-                    'Bulk CSV / Excel Export',
-                    'Priority Support Access'
-                  ].map((f, i) => (
-                    <li key={i} style={{ marginBottom: i === 4 ? 0 : '1rem' }}>
-                      <CheckCircle2 size={18} color="var(--primary)" style={{ flexShrink: 0 }} />
-                      <span style={{ color: 'var(--text-primary)', fontSize: '0.95rem' }}>{f}</span>
-                    </li>
-                  ))}
-                </ul>
+          {/* Features & CTA Card */}
+          <motion.div
+            className="pricing-card pricing-card--popular"
+            style={{ maxWidth: '480px', width: '100%', padding: '2rem', marginTop: '2rem' }}
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '16px', padding: '1.5rem', border: '1px solid var(--border)', marginBottom: '1.5rem' }}>
+              <ul className="pricing-features" style={{ margin: 0 }}>
+                {[
+                  'Unlimited Extractions',
+                  'Emails, Phones, Social Profiles',
+                  'Advanced Anti-Bot Scraping Engine',
+                  'Bulk CSV / Excel Export',
+                  'Priority Support Access'
+                ].map((f, i) => (
+                  <li key={i} style={{ marginBottom: i === 4 ? 0 : '1rem' }}>
+                    <CheckCircle2 size={18} color="var(--primary)" style={{ flexShrink: 0 }} />
+                    <span style={{ color: 'var(--text-primary)', fontSize: '0.95rem' }}>{f}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {error && (
+              <div className="error-banner" style={{ marginBottom: '1.5rem' }}>
+                <AlertCircle size={16} /> {error}
               </div>
+            )}
 
-              {error && (
-                <div className="error-banner" style={{ marginBottom: '1.5rem' }}>
-                  <AlertCircle size={16} /> {error}
-                </div>
-              )}
+            <div style={{ marginBottom: '1.5rem' }}>
+              <input
+                type="text"
+                placeholder="Code partenaire"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border)',
+                  background: 'rgba(255,255,255,0.05)',
+                  color: 'var(--text-primary)',
+                  fontSize: '0.95rem',
+                  outline: 'none'
+                }}
+              />
+            </div>
 
-              <div style={{ marginBottom: '1.5rem' }}>
-                <input
-                  type="text"
-                  placeholder="Code partenaire"
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border)',
-                    background: 'rgba(255,255,255,0.05)',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.95rem',
-                    outline: 'none'
-                  }}
-                />
-              </div>
+            {currentPlan === 'premium_monthly' || currentPlan === 'premium_yearly' ? (
+              <button
+                onClick={handlePortal}
+                className="btn-premium btn-premium-secondary"
+                style={{ width: '100%', height: '56px', fontSize: '1.1rem' }}
+                disabled={!!loading}
+              >
+                {loading === 'portal' ? <Loader2 className="spinner" /> : <><CreditCard size={20} /> Manage Subscription</>}
+              </button>
+            ) : (
+              <button
+                onClick={() => handleSubscribe(`premium_${billingCycle}`)}
+                className="btn-premium btn-premium-primary"
+                style={{ width: '100%', height: '56px', fontSize: '1.1rem' }}
+                disabled={!!loading}
+              >
+                {loading ? <Loader2 className="spinner" /> : <>Pay Now <ArrowRight size={20} /></>}
+              </button>
+            )}
 
-              {currentPlan === 'premium_monthly' || currentPlan === 'premium_yearly' ? (
-                <button
-                  onClick={handlePortal}
-                  className="btn-premium btn-premium-secondary"
-                  style={{ width: '100%', height: '56px', fontSize: '1.1rem' }}
-                  disabled={!!loading}
-                >
-                  {loading === 'portal' ? <Loader2 className="spinner" /> : <><CreditCard size={20} /> Manage Subscription</>}
-                </button>
-              ) : (
-                <button
-                  onClick={() => handleSubscribe(`premium_${billingCycle}`)}
-                  className="btn-premium btn-premium-primary"
-                  style={{ width: '100%', height: '56px', fontSize: '1.1rem' }}
-                  disabled={!!loading}
-                >
-                  {loading ? <Loader2 className="spinner" /> : <>Pay Now <ArrowRight size={20} /></>}
-                </button>
-              )}
-
-              <p style={{ marginTop: '1.5rem', fontSize: '0.8rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                <ShieldCheck size={14} /> Secured by Stripe Payments
-              </p>
-            </motion.div>
-          </div>
+            <p style={{ marginTop: '1.5rem', fontSize: '0.8rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+              <ShieldCheck size={14} /> Secured by Stripe Payments
+            </p>
+          </motion.div>
 
           <div style={{ marginTop: '4rem' }}>
             <button
