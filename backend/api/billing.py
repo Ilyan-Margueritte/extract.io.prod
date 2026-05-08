@@ -46,6 +46,23 @@ async def create_checkout_session(
     if not price_id:
         raise HTTPException(status_code=500, detail="Price ID not configured")
 
+    # Vérifier si c'est un code partenaire 100% gratuit
+    partner_free_code = os.getenv("PARTNER_FREE_CODE")
+    if coupon_code and partner_free_code and coupon_code.upper() == partner_free_code.upper():
+        # Activation directe sans paiement
+        subscription = user.subscription
+        if not subscription:
+            subscription = Subscription(user_id=user.id, plan=plan, status="active")
+            db.add(subscription)
+        else:
+            subscription.plan = plan
+            subscription.status = "active"
+        db.commit()
+        # Sync Clerk
+        if user.clerk_id:
+            await sync_clerk_metadata(user.clerk_id, plan)
+        return {"url": f"{FRONTEND_URL}/success?partner=true"}
+
     try:
         subscription = user.subscription
         customer_id = subscription.stripe_customer_id if subscription else None
