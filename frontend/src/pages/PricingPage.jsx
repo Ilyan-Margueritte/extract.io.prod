@@ -44,13 +44,16 @@ export default function PricingPage() {
       setError('');
 
       const token = await getToken();
-      const params = new URLSearchParams({ plan: `premium_${billingCycle}` });
+      const payload = { 
+        plan: `premium_${billingCycle}` 
+      };
       if (couponCode.trim()) {
-        params.append('coupon_code', couponCode.trim());
+        payload.coupon_code = couponCode.trim();
       }
+      
       const response = await axios.post(
-        `${API_URL}/v1/billing/create-checkout-session?${params}`,
-        {},
+        `${API_URL}/v1/billing/create-checkout-session`,
+        payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -58,7 +61,9 @@ export default function PricingPage() {
         window.location.href = response.data.url;
       }
     } catch (err) {
-      setError(err.response?.data?.detail || 'An error occurred while redirecting to payment.');
+      const errorDetail = err.response?.data?.detail || err.message || 'An error occurred while redirecting to payment.';
+      console.error("Checkout error:", err.response?.data || err);
+      setError(errorDetail);
       setLoading(null);
     }
   };
