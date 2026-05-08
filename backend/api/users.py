@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from models import User
-from schemas import UserUpdate
+from schemas import UserUpdate, UserResponse
 from auth import get_current_user
 
 router = APIRouter(prefix="/users", tags=["Users"])
