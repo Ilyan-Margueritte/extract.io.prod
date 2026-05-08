@@ -3,6 +3,8 @@
 # Extract.io - Automatic VPS Deployment Script for Hostinger
 # This script installs Docker and starts the full SaaS stack with SSL.
 
+clear
+
 echo "import update"
 git pull
 
