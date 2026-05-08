@@ -13,6 +13,7 @@ export default function PricingPage() {
   const { openSignIn } = useClerk();
   const [loading, setLoading] = useState(null);
   const [error, setError] = useState('');
+  const [couponCode, setCouponCode] = useState('');
 
   const handleSubscribe = async (plan) => {
     if (!isSignedIn) {
@@ -25,8 +26,12 @@ export default function PricingPage() {
       setError('');
 
       const token = await getToken();
+      const params = new URLSearchParams({ plan });
+      if (couponCode.trim()) {
+        params.append('coupon_code', couponCode.trim());
+      }
       const response = await axios.post(
-        `${API_URL}/v1/billing/create-checkout-session?plan=${plan}`,
+        `${API_URL}/v1/billing/create-checkout-session?${params}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -147,6 +152,25 @@ export default function PricingPage() {
                   <AlertCircle size={16} /> {error}
                 </div>
               )}
+
+              <div style={{ marginBottom: '1.5rem' }}>
+                <input
+                  type="text"
+                  placeholder="Code partenaire"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border)',
+                    background: 'rgba(255,255,255,0.05)',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.95rem',
+                    outline: 'none'
+                  }}
+                />
+              </div>
 
               {currentPlan === 'premium' ? (
                 <button

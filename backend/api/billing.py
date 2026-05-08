@@ -6,7 +6,7 @@ import os
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request, Header, status
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from database import get_db
 from models import User, Subscription, Invoice
@@ -30,6 +30,7 @@ PLANS = {
 @router.post("/create-checkout-session")
 async def create_checkout_session(
     plan: str,
+    coupon_code: str = None,
     user: User = Depends(get_authenticated_user),
     db: Session = Depends(get_db)
 ):
@@ -42,12 +43,10 @@ async def create_checkout_session(
         raise HTTPException(status_code=500, detail="Price ID not configured")
 
     try:
-        # Get or create Stripe Customer
         subscription = user.subscription
         customer_id = subscription.stripe_customer_id if subscription else None
 
         if not customer_id:
-            # Create new customer in Stripe
             customer = stripe.Customer.create(
                 email=user.email,
                 name=user.full_name,
@@ -55,7 +54,6 @@ async def create_checkout_session(
             )
             customer_id = customer.id
             
-            # Save customer ID to user's subscription record (or create it)
             if not subscription:
                 subscription = Subscription(user_id=user.id, stripe_customer_id=customer_id)
                 db.add(subscription)
@@ -63,20 +61,25 @@ async def create_checkout_session(
                 subscription.stripe_customer_id = customer_id
             db.commit()
 
-        checkout_session = stripe.checkout.Session.create(
-            customer=customer_id,
-            line_items=[{
+        session_params = {
+            "customer": customer_id,
+            "line_items": [{
                 'price': price_id,
                 'quantity': 1,
             }],
-            mode='subscription',
-            success_url=f"{FRONTEND_URL}/success",
-            cancel_url=f"{FRONTEND_URL}/pricing",
-            metadata={
+            "mode": 'subscription',
+            "success_url": f"{FRONTEND_URL}/success",
+            "cancel_url": f"{FRONTEND_URL}/pricing",
+            "metadata": {
                 "user_id": user.id,
                 "plan": plan
             }
-        )
+        }
+
+        if coupon_code:
+            session_params["discounts"] = [{"coupon": coupon_code.upper()}]
+
+        checkout_session = stripe.checkout.Session.create(**session_params)
         return {"url": checkout_session.url}
     except stripe.error.StripeError as e:
         # Generic Stripe error
