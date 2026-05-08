@@ -21,8 +21,9 @@ export default function PricingPage() {
       if (!isSignedIn) return;
       try {
         const token = await getToken();
-        const res = await axios.get(`${API_URL}/v1/users/me`, {
-          headers: { Authorization: `Bearer ${token}` }
+        const res = await axios.get(`${API_URL}/v1/users/me?t=${Date.now()}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: 'no-store'
         });
         setCurrentPlan(res.data.subscription?.plan || 'free');
       } catch (e) {

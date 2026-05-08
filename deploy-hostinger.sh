@@ -5,7 +5,8 @@
 
 clear
 
-echo "import update"
+echo "Import update"
+
 git pull
 
 echo "🚀 Starting Extract.io Deployment on VPS..."

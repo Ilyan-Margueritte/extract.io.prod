@@ -6,16 +6,31 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from models import User
-from schemas import UserResponse, UserUpdate
+from schemas import UserUpdate
 from auth import get_current_user
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
-@router.get("/me", response_model=UserResponse)
+@router.get("/me")
 def get_profile(current_user: User = Depends(get_current_user)):
     """Get current user profile"""
-    return current_user
+    from schemas import SubscriptionInUser
+    sub = None
+    if current_user.subscription:
+        sub = SubscriptionInUser(
+            plan=current_user.subscription.plan,
+            status=current_user.subscription.status
+        )
+    return {
+        "id": current_user.id,
+        "email": current_user.email,
+        "full_name": current_user.full_name,
+        "is_active": current_user.is_active,
+        "is_verified": current_user.is_verified,
+        "created_at": current_user.created_at,
+        "subscription": sub
+    }
 
 
 @router.put("/me", response_model=UserResponse)
