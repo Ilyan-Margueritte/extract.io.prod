@@ -26,7 +26,7 @@ export default function PricingPage() {
       setError('');
 
       const token = await getToken();
-      const params = new URLSearchParams({ plan });
+      const params = new URLSearchParams({ plan: `premium_${billingCycle}` });
       if (couponCode.trim()) {
         params.append('coupon_code', couponCode.trim());
       }
@@ -64,6 +64,7 @@ export default function PricingPage() {
   };
 
   const currentPlan = user?.subscription?.plan || 'free';
+  const [billingCycle, setBillingCycle] = useState('monthly');
 
   return (
     <div className="app-wrapper">
@@ -103,32 +104,43 @@ export default function PricingPage() {
             </p>
           </motion.div>
 
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            {/* Pro Plan Card */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+            {/* Monthly Plan */}
             <motion.div
-              className={`pricing-card pricing-card--popular`}
-              style={{ maxWidth: '480px', width: '100%', padding: '3rem' }}
+              className={`pricing-card ${billingCycle === 'monthly' ? 'pricing-card--popular' : ''}`}
+              style={{ maxWidth: '380px', width: '100%', padding: '2rem', cursor: 'pointer', border: billingCycle === 'monthly' ? '2px solid var(--primary)' : '1px solid var(--border)' }}
               initial={{ opacity: 0, scale: 1.05 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
+              onClick={() => setBillingCycle('monthly')}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 800 }}>Full Access</h3>
-                {currentPlan === 'premium' ? (
-                  <div className="badge" style={{ background: 'var(--success-dim)', color: 'var(--success-light)', borderColor: 'var(--success-glow)' }}>
-                    ACTIVE
-                  </div>
-                ) : (
-                  <div className="badge">MOST POPULAR</div>
-                )}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Mensuel</h3>
+                {billingCycle === 'monthly' && <div className="badge">SELECTED</div>}
               </div>
+              <div className="pricing-price" style={{ marginBottom: '0.5rem', fontSize: '2.5rem' }}>
+                4,90€<span style={{ fontSize: '1rem', color: 'var(--text-muted)', fontWeight: 400 }}>/month</span>
+              </div>
+            </motion.div>
 
-              <div className="pricing-price" style={{ marginBottom: '0.5rem', fontSize: '3.5rem' }}>
-                4,90€<span style={{ fontSize: '1.1rem', color: 'var(--text-muted)', fontWeight: 400 }}>/month</span>
+            {/* Yearly Plan */}
+            <motion.div
+              className={`pricing-card ${billingCycle === 'yearly' ? 'pricing-card--popular' : ''}`}
+              style={{ maxWidth: '380px', width: '100%', padding: '2rem', cursor: 'pointer', border: billingCycle === 'yearly' ? '2px solid var(--primary)' : '1px solid var(--border)' }}
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              onClick={() => setBillingCycle('yearly')}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Annuel</h3>
+                <div className="badge" style={{ background: 'var(--success-dim)', color: 'var(--success-light)' }}>-10%</div>
               </div>
-              <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem', fontSize: '1rem' }}>
-                Total transparency. No hidden fees. Cancel anytime.
-              </p>
+              <div className="pricing-price" style={{ marginBottom: '0.5rem', fontSize: '2.5rem' }}>
+                44,90€<span style={{ fontSize: '1rem', color: 'var(--text-muted)', fontWeight: 400 }}>/year</span>
+              </div>
+            </motion.div>
+          </div>
 
               <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '16px', padding: '1.5rem', border: '1px solid var(--border)', marginBottom: '2.5rem' }}>
                 <ul className="pricing-features" style={{ margin: 0 }}>
@@ -172,7 +184,7 @@ export default function PricingPage() {
                 />
               </div>
 
-              {currentPlan === 'premium' ? (
+              {currentPlan === 'premium_monthly' || currentPlan === 'premium_yearly' ? (
                 <button
                   onClick={handlePortal}
                   className="btn-premium btn-premium-secondary"
@@ -183,12 +195,12 @@ export default function PricingPage() {
                 </button>
               ) : (
                 <button
-                  onClick={() => handleSubscribe('premium')}
+                  onClick={() => handleSubscribe(`premium_${billingCycle}`)}
                   className="btn-premium btn-premium-primary"
                   style={{ width: '100%', height: '56px', fontSize: '1.1rem' }}
                   disabled={!!loading}
                 >
-                  {loading === 'premium' ? <Loader2 className="spinner" /> : <>Pay Now <ArrowRight size={20} /></>}
+                  {loading ? <Loader2 className="spinner" /> : <>Pay Now <ArrowRight size={20} /></>}
                 </button>
               )}
 

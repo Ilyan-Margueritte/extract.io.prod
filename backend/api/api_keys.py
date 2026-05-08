@@ -15,7 +15,7 @@ router = APIRouter(prefix="/api-keys", tags=["API Keys"])
 
 def require_premium_subscription(user: User):
     """Verify user has an active premium subscription"""
-    if not user.subscription or user.subscription.status != "active" or user.subscription.plan != "premium":
+    if not user.subscription or user.subscription.status != "active" or not user.subscription.plan.startswith("premium"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Premium subscription required. Please upgrade your plan to use API keys."

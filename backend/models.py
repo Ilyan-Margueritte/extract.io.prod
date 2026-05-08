@@ -92,11 +92,14 @@ class Subscription(Base):
     # Plan limits
     PLAN_LIMITS = {
         "free": {"scrapes_per_month": 0, "api_calls_per_day": 0},
-        "premium": {"scrapes_per_month": -1, "api_calls_per_day": -1}  # -1 = unlimited
+        "premium_monthly": {"scrapes_per_month": -1, "api_calls_per_day": -1},
+        "premium_yearly": {"scrapes_per_month": -1, "api_calls_per_day": -1}
     }
 
     def get_limits(self) -> dict:
         """Get limits for current plan"""
+        if self.plan and self.plan.startswith("premium"):
+            return {"scrapes_per_month": -1, "api_calls_per_day": -1}
         return self.PLAN_LIMITS.get(self.plan, self.PLAN_LIMITS["free"])
 
 
