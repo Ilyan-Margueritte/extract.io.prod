@@ -17,7 +17,6 @@ export default function PricingPage() {
   const [currentPlan, setCurrentPlan] = useState('free');
 
   useEffect(() => {
-    let retries = 0;
     async function fetchPlan() {
       if (!isSignedIn) return;
       try {
@@ -26,19 +25,9 @@ export default function PricingPage() {
           headers: { Authorization: `Bearer ${token}` },
           cache: 'no-store'
         });
-        const plan = res.data.subscription?.plan || 'free';
-        setCurrentPlan(plan);
-        if (plan === 'free' && retries < 2) {
-          retries++;
-          setTimeout(fetchPlan, 1000);
-        }
+        setCurrentPlan(res.data.subscription?.plan || 'free');
       } catch (e) {
-        if (retries < 2) {
-          retries++;
-          setTimeout(fetchPlan, 1000);
-        } else {
-          window.location.reload();
-        }
+        setCurrentPlan('free');
       }
     }
     fetchPlan();

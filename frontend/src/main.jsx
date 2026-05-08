@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ClerkProvider, SignedIn, SignedOut, SignIn, SignUp } from '@clerk/clerk-react';
 import Dashboard from './pages/Dashboard';
 import LandingPage from './pages/LandingPage';
@@ -97,6 +97,11 @@ const AuthLayout = ({ children }) => (
 
 import SuccessPage from './pages/Success';
 
+function PricingRouteWrapper() {
+  const location = useLocation();
+  return <PricingPage key={location.key} />;
+}
+
 function AppRoutes() {
   return (
     <Routes>
@@ -120,7 +125,7 @@ function AppRoutes() {
           </AuthLayout>
         }
       />
-
+ 
       <Route
         path="/dashboard/*"
         element={
@@ -134,13 +139,13 @@ function AppRoutes() {
           </>
         }
       />
-
+ 
       <Route
         path="/pricing"
         element={
           <>
             <SignedIn>
-              <PricingPage />
+              <PricingRouteWrapper />
             </SignedIn>
             <SignedOut>
               <Navigate to="/?sign-in=true" replace />
@@ -148,7 +153,7 @@ function AppRoutes() {
           </>
         }
       />
-
+ 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
