@@ -1,10 +1,42 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, Zap, ArrowRight, PartyPopper } from 'lucide-react';
+import { CheckCircle2, Zap, ArrowRight, PartyPopper, Loader2 } from 'lucide-react';
 
 export default function SuccessPage() {
   const navigate = useNavigate();
+  const { user, isLoaded } = useUser();
+  const [syncing, setSyncing] = useState(true);
+
+  useEffect(() => {
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    const tryReload = async () => {
+      if (!isLoaded || !user) {
+        setSyncing(false);
+        return;
+      }
+
+      await user.reload();
+      const plan = user.publicMetadata?.plan;
+      if (plan && plan.startsWith('premium')) {
+        setSyncing(false);
+        return;
+      }
+
+      attempts++;
+      if (attempts >= maxAttempts) {
+        setSyncing(false);
+        return;
+      }
+
+      setTimeout(tryReload, 2000);
+    };
+
+    setTimeout(tryReload, 1000);
+  }, [isLoaded, user]);
 
   return (
     <div className="app-wrapper" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', position: 'relative', overflow: 'hidden' }}>
@@ -44,11 +76,14 @@ export default function SuccessPage() {
         </div>
 
         <h1 className="hero__title" style={{ fontSize: 'clamp(32px, 5vw, 42px)', marginBottom: '1.25rem' }}>
-          Welcome to <span className="text-gradient-primary">Premium</span>
+          {syncing ? 'Synchronisation' : 'Welcome to'} <span className="text-gradient-primary">Premium</span>
         </h1>
         
         <p style={{ color: 'var(--text-secondary)', fontSize: '1.15rem', lineHeight: '1.7', marginBottom: '3rem', maxWidth: '420px', margin: '0 auto 3rem' }}>
-          Your account has been upgraded. You now have unlimited access to all professional extraction tools.
+          {syncing
+            ? 'Your subscription is being activated. Please wait a moment...'
+            : 'Your account has been upgraded. You now have unlimited access to all professional extraction tools.'
+          }
         </p>
 
         <div style={{ display: 'grid', gap: '1.5rem' }}>

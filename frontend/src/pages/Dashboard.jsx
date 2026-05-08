@@ -80,10 +80,16 @@ const SidebarLink = ({ to, icon, label, active }) => (
 export default function Dashboard() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
   const { getToken } = useAuth();
   const path = location.pathname;
+
+  useEffect(() => {
+    if (user) {
+      user.reload();
+    }
+  }, []);
 
   const handleLogout = () => {
     signOut();

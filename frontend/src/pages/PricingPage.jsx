@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Zap, ArrowRight, Loader2, CreditCard, ShieldCheck, AlertCircle } from 'lucide-react';
@@ -65,6 +65,10 @@ export default function PricingPage() {
 
   const currentPlan = user?.subscription?.plan || 'free';
   const [billingCycle, setBillingCycle] = useState('monthly');
+
+  useEffect(() => {
+    if (user) user.reload();
+  }, []);
 
   return (
     <div className="app-wrapper">
