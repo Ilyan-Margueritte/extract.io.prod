@@ -14,6 +14,23 @@ export default function PricingPage() {
   const [loading, setLoading] = useState(null);
   const [error, setError] = useState('');
   const [couponCode, setCouponCode] = useState('');
+  const [currentPlan, setCurrentPlan] = useState('free');
+
+  useEffect(() => {
+    async function fetchPlan() {
+      if (!isSignedIn) return;
+      try {
+        const token = await getToken();
+        const res = await axios.get(`${API_URL}/v1/users/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setCurrentPlan(res.data.subscription?.plan || 'free');
+      } catch (e) {
+        setCurrentPlan('free');
+      }
+    }
+    fetchPlan();
+  }, [isSignedIn, getToken]);
 
   const handleSubscribe = async (plan) => {
     if (!isSignedIn) {
@@ -63,12 +80,7 @@ export default function PricingPage() {
     }
   };
 
-  const currentPlan = user?.subscription?.plan || 'free';
   const [billingCycle, setBillingCycle] = useState('monthly');
-
-  useEffect(() => {
-    if (user) user.reload();
-  }, []);
 
   return (
     <div className="app-wrapper">
