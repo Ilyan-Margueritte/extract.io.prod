@@ -21,9 +21,13 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
 # Plan configurations
 PLANS = {
-    "premium": {
+    "premium_monthly": {
         "price_id": os.getenv("STRIPE_PREMIUM_PRICE_ID"),
-        "name": "Premium Plan"
+        "name": "Premium Mensuel"
+    },
+    "premium_yearly": {
+        "price_id": os.getenv("STRIPE_PREMIUM_YEARLY_PRICE_ID"),
+        "name": "Premium Annuel"
     }
 }
 

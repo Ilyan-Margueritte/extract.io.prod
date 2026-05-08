@@ -107,7 +107,7 @@ const PricingCard = ({ title, price, features, popular, delay }) => (
   >
     <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>{title}</h3>
     <div className="pricing-price" style={{ marginBottom: '1.5rem' }}>
-      ${price}<span style={{ color: 'var(--text-muted)', fontWeight: 400, fontSize: '1rem' }}>/month</span>
+      {price}€<span style={{ color: 'var(--text-muted)', fontWeight: 400, fontSize: '1rem' }}>/month</span>
     </div>
     <ul className="pricing-features" style={{ marginBottom: '2rem' }}>
       {features.map((f, i) => (
@@ -286,7 +286,7 @@ export default function LandingPage() {
           <div className="pricing-grid" style={{ display: 'flex', justifyContent: 'center' }}>
             <PricingCard 
               title="Full Access" 
-              price="4.90" 
+              price="4,90" 
               features={[
                 'Unlimited Extractions', 
                 'Emails & Phone Numbers', 

@@ -236,7 +236,7 @@ export default function Dashboard() {
                   Access to the Extract.io tool is restricted to members only. Activate your access now to get started.
                 </p>
                 <Link to="/pricing" className="btn-premium btn-premium-primary" style={{ padding: '1rem 2.5rem', fontSize: '1rem', textDecoration: 'none' }}>
-                  Activate My Access ($4.90 / month)
+                  Activate My Access (4,90€ / month)
                 </Link>
               </div>
             ) : (

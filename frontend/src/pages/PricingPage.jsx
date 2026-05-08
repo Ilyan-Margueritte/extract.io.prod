@@ -124,7 +124,7 @@ export default function PricingPage() {
               </div>
 
               <div className="pricing-price" style={{ marginBottom: '0.5rem', fontSize: '3.5rem' }}>
-                $4.90<span style={{ fontSize: '1.1rem', color: 'var(--text-muted)', fontWeight: 400 }}>/month</span>
+                4,90€<span style={{ fontSize: '1.1rem', color: 'var(--text-muted)', fontWeight: 400 }}>/month</span>
               </div>
               <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem', fontSize: '1rem' }}>
                 Total transparency. No hidden fees. Cancel anytime.
