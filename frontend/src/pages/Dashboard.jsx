@@ -213,7 +213,7 @@ export default function Dashboard() {
               Welcome back, <strong>{user?.fullName || 'User'}</strong>.
               {plan === 'PREMIUM'
                 ? <span> Enjoy your <strong>Unlimited</strong> access.</span>
-                : <span> <Link to="/pricing" style={{ color: 'var(--primary)', fontWeight: 600 }}>Pay for Premium</Link> to start extracting leads.</span>
+                : <span> <a href="/pricing" style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>Pay for Premium</a> to start extracting leads.</span>
               }
             </p>
           </div>
@@ -241,9 +241,9 @@ export default function Dashboard() {
                 <p style={{ color: 'var(--text-dim)', marginBottom: '2rem', maxWidth: '400px', margin: '0 auto 1.75rem', fontSize: '1rem', lineHeight: '1.6' }}>
                   Access to the Extract.io tool is restricted to members only. Activate your access now to get started.
                 </p>
-                <Link to="/pricing" className="btn-premium btn-premium-primary" style={{ padding: '1rem 2.5rem', fontSize: '1rem', textDecoration: 'none' }}>
+                <a href="/pricing" className="btn-premium btn-premium-primary" style={{ padding: '1rem 2.5rem', fontSize: '1rem', textDecoration: 'none', display: 'inline-block' }}>
                   Activate My Access (4,90€ / month)
-                </Link>
+                </a>
               </div>
             ) : (
               <ScraperTool />
@@ -261,9 +261,9 @@ export default function Dashboard() {
                   Manage or Cancel on Stripe
                 </button>
               ) : (
-                <Link to="/pricing" className="btn-premium btn-premium-primary" style={{ textDecoration: 'none', display: 'inline-block' }}>
+                <a href="/pricing" className="btn-premium btn-premium-primary" style={{ textDecoration: 'none', display: 'inline-block' }}>
                   Pay for Premium
-                </Link>
+                </a>
               )}
             </div>
           } />
