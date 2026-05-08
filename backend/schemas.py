@@ -51,7 +51,17 @@ class UserResponse(BaseModel):
     is_active: bool
     is_verified: bool
     created_at: datetime
-    plan: str = "free"
+    subscription: Optional["SubscriptionInUser"] = None
+
+    @property
+    def plan(self) -> str:
+        return self.subscription.plan if self.subscription else "free"
+
+
+class SubscriptionInUser(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    plan: str
+    status: str
 
 
 class UserUpdate(BaseModel):
