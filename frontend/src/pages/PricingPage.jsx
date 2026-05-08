@@ -121,7 +121,7 @@ export default function PricingPage() {
             </p>
           </motion.div>
 
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
             {/* Monthly Plan */}
             <motion.div
               className={`pricing-card ${billingCycle === 'monthly' ? 'pricing-card--popular' : ''}`}
