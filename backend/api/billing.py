@@ -172,6 +172,9 @@ async def sync_clerk_metadata(clerk_id: str, plan: str):
     if not CLERK_SECRET_KEY or not clerk_id:
         return
 
+    # Normaliser le plan pour le frontend (premium_monthly -> premium)
+    base_plan = plan.split('_')[0] if '_' in plan else plan
+
     async with httpx.AsyncClient() as client:
         try:
             await client.patch(
@@ -179,7 +182,7 @@ async def sync_clerk_metadata(clerk_id: str, plan: str):
                 headers={"Authorization": f"Bearer {CLERK_SECRET_KEY}"},
                 json={
                     "public_metadata": {
-                        "plan": plan
+                        "plan": base_plan
                     }
                 }
             )
