@@ -112,10 +112,10 @@ export default function PricingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="hero__eyebrow" style={{ marginBottom: '1.5rem' }}>
+            <div className="hero__eyebrow">
               <div className="dot" style={{ background: 'var(--primary)' }} /> Secure Checkout Session
             </div>
-            <h1 className="hero__title" style={{ fontSize: 'clamp(32px, 5vw, 48px)', marginBottom: '1rem' }}>
+            <h1 className="hero__title">
               Activate Your <span className="text-gradient-primary">Access</span>
             </h1>
             <p className="hero__subtitle" style={{ marginBottom: '3rem' }}>
@@ -123,11 +123,9 @@ export default function PricingPage() {
             </p>
           </motion.div>
 
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-            {/* Monthly Plan */}
+          <div className="pricing-selector">
             <motion.div
-              className={`pricing-card ${billingCycle === 'monthly' ? 'pricing-card--popular' : ''}`}
-              style={{ maxWidth: '380px', width: '100%', padding: '2rem', cursor: 'pointer', border: billingCycle === 'monthly' ? '2px solid var(--primary)' : '1px solid var(--border)' }}
+              className={`pricing-card ${billingCycle === 'monthly' ? 'pricing-card--selected' : ''}`}
               initial={{ opacity: 0, scale: 1.05 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
@@ -135,17 +133,15 @@ export default function PricingPage() {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Mensuel</h3>
-                {billingCycle === 'monthly' && <div className="badge">SELECTED</div>}
+                {billingCycle === 'monthly' && <span className="badge">SELECTED</span>}
               </div>
-              <div className="pricing-price" style={{ marginBottom: '0.5rem', fontSize: '2.5rem' }}>
-                4,90€<span style={{ fontSize: '1rem', color: 'var(--text-muted)', fontWeight: 400 }}>/month</span>
+              <div className="pricing-price">
+                4,90€<span>/month</span>
               </div>
             </motion.div>
 
-            {/* Yearly Plan */}
             <motion.div
-              className={`pricing-card ${billingCycle === 'yearly' ? 'pricing-card--popular' : ''}`}
-              style={{ maxWidth: '380px', width: '100%', padding: '2rem', cursor: 'pointer', border: billingCycle === 'yearly' ? '2px solid var(--primary)' : '1px solid var(--border)' }}
+              className={`pricing-card ${billingCycle === 'yearly' ? 'pricing-card--selected' : ''}`}
               initial={{ opacity: 0, scale: 1.05 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.3 }}
@@ -153,24 +149,23 @@ export default function PricingPage() {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Annuel</h3>
-                <div className="badge" style={{ background: 'var(--success-dim)', color: 'var(--success-light)' }}>-10%</div>
+                <span className="badge badge--saving">-10%</span>
               </div>
-              <div className="pricing-price" style={{ marginBottom: '0.5rem', fontSize: '2.5rem' }}>
-                44,90€<span style={{ fontSize: '1rem', color: 'var(--text-muted)', fontWeight: 400 }}>/year</span>
+              <div className="pricing-price">
+                44,90€<span>/year</span>
               </div>
             </motion.div>
           </div>
 
           {/* Features & CTA Card */}
           <motion.div
-            className="pricing-card pricing-card--popular"
-            style={{ maxWidth: '480px', width: '100%', padding: '2rem', marginTop: '2rem' }}
+            className="pricing-card pricing-card--popular pricing-cta"
             initial={{ opacity: 0, scale: 1.05 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
-            <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '16px', padding: '1.5rem', border: '1px solid var(--border)', marginBottom: '1.5rem' }}>
-              <ul className="pricing-features" style={{ margin: 0 }}>
+            <div className="pricing-features-box">
+              <ul className="pricing-features">
                 {[
                   'Unlimited Extractions',
                   'Emails, Phones, Social Profiles',
@@ -178,9 +173,9 @@ export default function PricingPage() {
                   'Bulk CSV / Excel Export',
                   'Priority Support Access'
                 ].map((f, i) => (
-                  <li key={i} style={{ marginBottom: i === 4 ? 0 : '1rem' }}>
+                  <li key={i}>
                     <CheckCircle2 size={18} color="var(--primary)" style={{ flexShrink: 0 }} />
-                    <span style={{ color: 'var(--text-primary)', fontSize: '0.95rem' }}>{f}</span>
+                    <span>{f}</span>
                   </li>
                 ))}
               </ul>
@@ -195,19 +190,10 @@ export default function PricingPage() {
             <div style={{ marginBottom: '1.5rem' }}>
               <input
                 type="text"
+                className="pricing-coupon"
                 placeholder="Code partenaire"
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                style={{
-                  width: '100%',
-                  padding: '12px 16px',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border)',
-                  background: 'rgba(255,255,255,0.05)',
-                  color: 'var(--text-primary)',
-                  fontSize: '0.95rem',
-                  outline: 'none'
-                }}
               />
             </div>
 
@@ -231,7 +217,7 @@ export default function PricingPage() {
               </button>
             )}
 
-            <p style={{ marginTop: '1.5rem', fontSize: '0.8rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            <p className="pricing-secured">
               <ShieldCheck size={14} /> Secured by Stripe Payments
             </p>
           </motion.div>

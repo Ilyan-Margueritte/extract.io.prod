@@ -816,6 +816,12 @@ body {
   border: 1px solid var(--border-primary);
 }
 
+.badge--saving {
+  background: var(--success-dim);
+  color: var(--success-light);
+  border-color: var(--success-glow);
+}
+
 .results-actions {
   display: flex;
   gap: 8px;
@@ -1269,6 +1275,176 @@ body {
   margin-top: 4rem;
 }
 
+.pricing-selector {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.pricing-selector .pricing-card {
+  max-width: 380px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.pricing-selector .pricing-card:hover {
+  border-color: var(--border-bright);
+  box-shadow: var(--shadow-xl), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.pricing-selector .pricing-card--selected {
+  border: 2px solid var(--primary) !important;
+  background: linear-gradient(180deg, var(--surface-high) 0%, var(--surface) 100%), radial-gradient(circle at top right, var(--primary-surface-strong) 0%, transparent 50%);
+  box-shadow: var(--shadow-glow), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.pricing-cta {
+  max-width: 480px;
+  width: 100%;
+  margin-top: 2rem;
+}
+
+.pricing-coupon {
+  width: 100%;
+  height: 48px;
+  padding: 0 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: var(--font);
+  outline: none;
+  transition: var(--transition-smooth);
+}
+
+.pricing-coupon:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-dim);
+}
+
+.pricing-coupon::placeholder {
+  color: var(--text-dim);
+}
+
+.pricing-features-box {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+
+.pricing-features-box .pricing-features {
+  margin: 0;
+}
+
+.pricing-secured {
+  margin-top: 1.5rem;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* ─── Success Page ─── */
+.success-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.success-card {
+  max-width: 540px;
+  width: 100%;
+  padding: 4rem;
+  text-align: center;
+  background: linear-gradient(180deg, var(--surface-high) 0%, var(--surface) 100%);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-glow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  position: relative;
+}
+
+.success-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 30px;
+  background: var(--gradient-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: var(--shadow-glow);
+  margin: 0 auto 2.5rem;
+}
+
+.success-title {
+  font-family: var(--font-heading);
+  font-size: clamp(32px, 5vw, 42px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  color: var(--text-primary);
+  margin-bottom: 1.25rem;
+}
+
+.success-desc {
+  color: var(--text-secondary);
+  font-size: 1.15rem;
+  line-height: 1.7;
+  max-width: 420px;
+  margin: 0 auto 3rem;
+}
+
+.success-footer {
+  margin-top: 4rem;
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+}
+
+@media (max-width: 600px) {
+  .success-card {
+    padding: 2.5rem 1.5rem;
+  }
+  .success-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 24px;
+  }
+  .success-icon svg {
+    width: 36px;
+    height: 36px;
+  }
+  .success-desc {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .pricing-selector {
+    flex-direction: column;
+  }
+  .pricing-selector .pricing-card {
+    max-width: 100%;
+  }
+  .pricing-cta {
+    max-width: 100%;
+  }
+  .pricing-features-box {
+    padding: 1rem;
+  }
+}
+
 .pricing-card {
   background: linear-gradient(180deg, var(--surface-high) 0%, var(--surface) 100%);
   border: 1px solid var(--border);
@@ -1341,7 +1517,7 @@ body {
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 1rem;
-  color: var(--text-muted);
+  color: var(--text-primary);
   font-size: 0.95rem;
 }
 

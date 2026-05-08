@@ -252,18 +252,44 @@ export default function Dashboard() {
           <Route path="/history" element={<HistoryView />} />
           <Route path="/billing" element={
             <div className="panel" style={{ padding: '4rem', textAlign: 'center' }}>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Subscription Management</h2>
-              <p style={{ color: 'var(--text-dim)', marginBottom: '2rem' }}>
-                You are currently on the <strong>{plan}</strong> plan.
+              <div style={{ background: 'var(--primary-dim)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                <CreditCard size={28} color="var(--primary)" />
+              </div>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.75rem' }}>Subscription Management</h2>
+              <p style={{ color: 'var(--text-dim)', marginBottom: '0.5rem' }}>
+                You are currently on the
               </p>
+              <span className="plan-badge" style={{
+                fontSize: '1.1rem',
+                fontWeight: 700,
+                padding: '6px 20px',
+                borderRadius: '20px',
+                border: plan === 'PREMIUM' ? '1px solid var(--success-glow)' : '1px solid var(--border)',
+                background: plan === 'PREMIUM' ? 'var(--success-dim)' : 'var(--surface-high)',
+                color: plan === 'PREMIUM' ? 'var(--success-light)' : 'var(--text-secondary)',
+                display: 'inline-block',
+                marginBottom: '2rem'
+              }}>
+                {plan === 'PREMIUM' ? 'PREMIUM' : 'FREE'}
+              </span>
               {plan === 'PREMIUM' ? (
-                <button onClick={handlePortal} className="btn-premium btn-premium-primary" style={{ padding: '0.8rem 2rem' }}>
-                  Manage or Cancel on Stripe
-                </button>
+                <div>
+                  <p style={{ color: 'var(--text-dim)', marginBottom: '2rem', fontSize: '0.9rem' }}>
+                    Manage your subscription, update payment method, or cancel anytime via the Stripe portal.
+                  </p>
+                  <button onClick={handlePortal} className="btn-premium btn-premium-primary" style={{ padding: '0.8rem 2rem' }}>
+                    Manage Subscription
+                  </button>
+                </div>
               ) : (
-                <a href="/pricing" className="btn-premium btn-premium-primary" style={{ textDecoration: 'none', display: 'inline-block' }}>
-                  Pay for Premium
-                </a>
+                <div>
+                  <p style={{ color: 'var(--text-dim)', marginBottom: '2rem', fontSize: '0.9rem' }}>
+                    Upgrade to Premium for unlimited access to all extraction tools.
+                  </p>
+                  <a href="/pricing" className="btn-premium btn-premium-primary" style={{ textDecoration: 'none', display: 'inline-block', padding: '0.8rem 2.5rem' }}>
+                    Upgrade Now — 4,90€ / month
+                  </a>
+                </div>
               )}
             </div>
           } />
