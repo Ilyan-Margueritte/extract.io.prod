@@ -77,7 +77,9 @@ async def create_checkout_session(
             "metadata": {
                 "user_id": user.id,
                 "plan": plan
-            }
+            },
+            "phone_number_collection": {"enabled": False},
+            "billing_address_collection": "auto"
         }
 
         if coupon_code:
@@ -85,11 +87,15 @@ async def create_checkout_session(
 
         checkout_session = stripe.checkout.Session.create(**session_params)
         return {"url": checkout_session.url}
+    except stripe.error.InvalidRequestError as e:
+        error_msg = str(e)
+        if "coupon" in error_msg.lower() and "no such" in error_msg.lower():
+            raise HTTPException(status_code=400, detail="Code promo invalide. Vérifiez le code saisi et réessayez.")
+        raise HTTPException(status_code=400, detail=error_msg)
     except stripe.error.StripeError as e:
-        # Generic Stripe error
-        raise HTTPException(status_code=400, detail=f"Stripe Error: {str(e)}")
+        raise HTTPException(status_code=400, detail="Une erreur de paiement est survenue. Veuillez réessayer.")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal Error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Une erreur interne est survenue. Veuillez réessayer.")
 
 @router.post("/create-portal-session")
 async def create_portal_session(
