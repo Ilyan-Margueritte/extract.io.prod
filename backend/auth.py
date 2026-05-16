@@ -4,7 +4,7 @@ Clerk Authentication for Extract.io SaaS
 import os
 import httpx
 from typing import Optional
-from jose import jwt, JWTError, jwk
+from jose import jwt, JWTError
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
@@ -58,17 +58,25 @@ async def get_current_user(
         print(f"DEBUG: Token received (first 50 chars): {token[:50] if token else 'None'}...")
 
     try:
+        payload = None
+
         # 1. Try local PEM validation if available
         CLERK_PUBLIC_KEY = os.getenv("CLERK_PUBLIC_KEY")
         if CLERK_PUBLIC_KEY and "placeholder" not in CLERK_PUBLIC_KEY:
-            payload = jwt.decode(
-                token,
-                CLERK_PUBLIC_KEY,
-                algorithms=["RS256"],
-                options={"verify_aud": False}
-            )
-        else:
-            # 2. Try JWKS validation
+            try:
+                payload = jwt.decode(
+                    token,
+                    CLERK_PUBLIC_KEY,
+                    algorithms=["RS256"],
+                    options={"verify_aud": False}
+                )
+            except Exception:
+                if os.getenv("APP_ENV") == "development":
+                    print("DEBUG: PEM validation failed, falling back to JWKS")
+                payload = None
+
+        # 2. Try JWKS validation (fallback or primary)
+        if payload is None:
             if os.getenv("APP_ENV") == "development":
                 print("DEBUG: Using JWKS validation")
             jwks_data = await get_jwks()
@@ -76,16 +84,16 @@ async def get_current_user(
                 header = jwt.get_unverified_header(token)
                 kid = header.get("kid")
 
-                public_key = None
+                key_data_matched = None
                 for key_data in jwks_data.get("keys", []):
                     if key_data.get("kid") == kid:
-                        public_key = jwk.construct(key_data)
+                        key_data_matched = key_data
                         break
 
-                if public_key:
+                if key_data_matched:
                     payload = jwt.decode(
                         token,
-                        public_key.to_pem().decode('utf-8'),
+                        key_data_matched,
                         algorithms=["RS256"],
                         options={"verify_aud": False}
                     )
