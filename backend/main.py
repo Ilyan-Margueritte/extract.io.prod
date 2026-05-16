@@ -2,6 +2,7 @@
 Extract.io SaaS - Main FastAPI Application
 """
 import os
+from pathlib import Path
 from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -10,14 +11,17 @@ import time
 import logging
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+# Load .env from project root (parent of backend/)
+env_path = Path(__file__).parent.parent / '.env'
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
+else:
+    load_dotenv()
 
 # Validation des variables d'environnement critiques
 REQUIRED_ENV_VARS = [
     "CLERK_PUBLIC_KEY",
     "STRIPE_SECRET_KEY",
-    "STRIPE_WEBHOOK_SECRET",
     "API_KEY_PEPPER",
     "DATABASE_URL",
 ]
@@ -28,7 +32,7 @@ for var in REQUIRED_ENV_VARS:
 from database import engine, Base, get_db
 from sqlalchemy.orm import Session
 from models import User
-from api import auth as auth_router, users, dashboard, api_keys, scrape, billing
+from api import auth as auth_router, users, dashboard, api_keys, scrape, billing, public_api
 from auth import get_authenticated_user
 from scraper import StoreInfo
 
@@ -43,12 +47,10 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and shutdown events"""
-    # Startup: Create database tables
     logger.info("Creating database tables...")
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables created successfully")
     yield
-    # Shutdown: Cleanup if needed
     logger.info("Shutting down...")
 
 
@@ -68,7 +70,7 @@ async def log_requests(request: Request, call_next):
     logger.info(f"{request.method} {request.url.path} - {response.status_code} - {duration:.3f}s")
     return response
 
-# Enable CORS for frontend (Must be outermost middleware)
+# Enable CORS for frontend
 allowed_origins_raw = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173")
 allowed_origins = [origin.strip() for origin in allowed_origins_raw.split(",")]
 logger.info(f"CORS Allowed Origins: {allowed_origins}")
@@ -81,31 +83,39 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# CORS is already handled by CORSMiddleware above. 
-# Removing dynamic force_cors_middleware for security.
-
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Global exception handler"""
     logger.error(f"Unhandled error: {str(exc)}", exc_info=True)
+    origin = request.headers.get("origin", "")
+    headers = {}
+    if origin in allowed_origins or any(origin.startswith(o.rstrip("*")) for o in allowed_origins if "*" in o):
+        headers = {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*",
+        }
     return JSONResponse(
         status_code=500,
-        content={"detail": "Internal server error"}
+        content={"detail": "Internal server error"},
+        headers=headers
     )
 
 
 # Include routers
-app.include_router(auth_router.router, prefix="/v1")
-app.include_router(users.router, prefix="/v1")
-app.include_router(dashboard.router, prefix="/v1")
-app.include_router(api_keys.router, prefix="/v1")
-app.include_router(scrape.router, prefix="/v1")
-app.include_router(billing.router, prefix="/v1")
+app.include_router(auth_router.router, prefix="/api/v1")
+app.include_router(users.router, prefix="/api/v1")
+app.include_router(dashboard.router, prefix="/api/v1")
+app.include_router(api_keys.router, prefix="/api/v1")
+app.include_router(scrape.router, prefix="/api/v1")
+app.include_router(billing.router, prefix="/api/v1")
+app.include_router(public_api.router, prefix="/api/v1")
 
 
 # Legacy endpoints (for backward compatibility) - NOW PROTECTED
-@app.post("/scrape", response_model=StoreInfo)
+@app.post("/api/scrape", response_model=StoreInfo)
 async def legacy_scrape_endpoint(
     request: scrape.ScrapeRequest,
     user: User = Depends(get_authenticated_user),
@@ -114,7 +124,8 @@ async def legacy_scrape_endpoint(
     """Legacy scrape endpoint (will be deprecated)"""
     return await scrape.create_scrape_job(request=request, user=user, db=db)
 
-@app.post("/scrape-bulk", response_model=list[StoreInfo])
+
+@app.post("/api/scrape-bulk", response_model=list[StoreInfo])
 async def legacy_scrape_bulk_endpoint(
     request: scrape.BulkScrapeRequest,
     user: User = Depends(get_authenticated_user),

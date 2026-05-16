@@ -115,6 +115,7 @@ class ApiKeyWithSecret(ApiKeyResponse):
 
 import json
 
+
 class ScrapeJobResponse(BaseModel):
     id: int
     url: str
@@ -145,6 +146,29 @@ class ScrapeJobListResponse(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+class PublicScrapeResponse(BaseModel):
+    id: int
+    url: str
+    status: str
+    result: Optional[Dict[str, Any]]
+    error_message: Optional[str]
+    credits_used: int
+    processing_time_ms: Optional[int]
+    created_at: str
+    completed_at: Optional[str]
+    emails: Optional[List[str]] = []
+    valid_emails: Optional[List[str]] = []
+    invalid_emails: Optional[List[str]] = []
+    phones: Optional[List[str]] = []
+    social_links: Optional[Dict[str, str]] = {}
+    addresses: Optional[List[str]] = []
+    prices: Optional[List[Dict[str, Any]]] = []
+    products: Optional[List[Dict[str, Any]]] = []
+
+    class Config:
+        from_attributes = True
 
 
 # === Usage Schemas ===
@@ -186,3 +210,15 @@ class DashboardStats(BaseModel):
     api_calls_today: int
     plan: str
     subscription_status: str
+
+
+# --- Keep at end for internal API key stats ---
+class ApiKeyStats(BaseModel):
+    id: int
+    key_prefix: str
+    name: Optional[str]
+    is_active: bool
+    last_used: Optional[datetime]
+    created_at: datetime
+    total_calls: int
+    total_errors: int

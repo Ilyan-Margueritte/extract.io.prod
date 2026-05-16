@@ -33,38 +33,33 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), unique=True, index=True, nullable=False)
-    clerk_id = Column(String(255), unique=True, index=True, nullable=True) # For Clerk.com Auth
-    password_hash = Column(String(255), nullable=True) # Optional if using Clerk
+    clerk_id = Column(String(255), unique=True, index=True, nullable=True)
+    password_hash = Column(String(255), nullable=True)
     full_name = Column(String(255), nullable=True)
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Relationships
     subscription = relationship("Subscription", back_populates="user", uselist=False, cascade="all, delete-orphan")
     api_keys = relationship("ApiKey", back_populates="user", cascade="all, delete-orphan")
     scrape_jobs = relationship("ScrapeJob", back_populates="user", cascade="all, delete-orphan")
     usage_records = relationship("Usage", back_populates="user", cascade="all, delete-orphan")
 
     def set_password(self, password: str):
-        """Hash and set password using bcrypt"""
         salt = bcrypt.gensalt()
         self.password_hash = bcrypt.hashpw(password.encode(), salt).decode('utf-8')
 
     def verify_password(self, password: str) -> bool:
-        """Verify password against hash using bcrypt"""
         if not self.password_hash:
             return False
         return bcrypt.checkpw(password.encode(), self.password_hash.encode('utf-8'))
 
     def has_active_subscription(self) -> bool:
-        """Check if user has an active subscription"""
         return self.subscription and self.subscription.status == "active"
 
     @property
     def plan(self) -> str:
-        """Get user's subscription plan"""
         if self.subscription and self.subscription.status == "active":
             return self.subscription.plan
         return "free"
@@ -75,10 +70,10 @@ class Subscription(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
-    plan = Column(String(50), default="free")  # free, premium
+    plan = Column(String(50), default="free")
     stripe_customer_id = Column(String(255), unique=True, nullable=True)
     stripe_subscription_id = Column(String(255), unique=True, nullable=True)
-    status = Column(String(50), default="free")  # free, active, cancelled, past_due
+    status = Column(String(50), default="free")
     current_period_start = Column(DateTime, nullable=True)
     current_period_end = Column(DateTime, nullable=True)
     cancel_at_period_end = Column(Boolean, default=False)
@@ -86,10 +81,8 @@ class Subscription(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Relationship
     user = relationship("User", back_populates="subscription")
 
-    # Plan limits
     PLAN_LIMITS = {
         "free": {"scrapes_per_month": 0, "api_calls_per_day": 0},
         "premium_monthly": {"scrapes_per_month": -1, "api_calls_per_day": -1},
@@ -97,7 +90,6 @@ class Subscription(Base):
     }
 
     def get_limits(self) -> dict:
-        """Get limits for current plan"""
         if self.plan and self.plan.startswith("premium"):
             return {"scrapes_per_month": -1, "api_calls_per_day": -1}
         return self.PLAN_LIMITS.get(self.plan, self.PLAN_LIMITS["free"])
@@ -109,18 +101,16 @@ class ApiKey(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     key_hash = Column(String(64), unique=True, nullable=False, index=True)
-    key_prefix = Column(String(8), nullable=False)  # For display purposes (e.g., "ek_a1b2")
+    key_prefix = Column(String(8), nullable=False)
     name = Column(String(255), nullable=True)
     is_active = Column(Boolean, default=True)
     last_used = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    # Relationship
     user = relationship("User", back_populates="api_keys")
 
     @classmethod
     def create(cls, user_id: int, name: str = None):
-        """Create a new API key and return the key and the model"""
         key = generate_api_key()
         api_key = cls(
             user_id=user_id,
@@ -131,7 +121,6 @@ class ApiKey(Base):
         return api_key, key
 
     def verify(self, key: str) -> bool:
-        """Verify if the provided key matches this API key using timing-safe comparison"""
         return hmac.compare_digest(self.key_hash, hash_api_key(key))
 
 
@@ -141,15 +130,14 @@ class ScrapeJob(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     url = Column(Text, nullable=False)
-    status = Column(String(50), default="pending")  # pending, processing, completed, failed
-    result = Column(Text, nullable=True)  # JSON string of the result
+    status = Column(String(50), default="pending")
+    result = Column(Text, nullable=True)
     error_message = Column(Text, nullable=True)
     credits_used = Column(Integer, default=1)
     processing_time_ms = Column(Integer, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
     completed_at = Column(DateTime, nullable=True)
 
-    # Relationship
     user = relationship("User", back_populates="scrape_jobs")
 
     __table_args__ = (
@@ -169,7 +157,6 @@ class Usage(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Relationship
     user = relationship("User", back_populates="usage_records")
 
     __table_args__ = (
@@ -186,10 +173,23 @@ class Invoice(Base):
     stripe_invoice_id = Column(String(255), unique=True, nullable=True)
     amount = Column(Float, nullable=False)
     currency = Column(String(3), default="EUR")
-    status = Column(String(50), default="pending")  # pending, paid, failed, refunded
+    status = Column(String(50), default="pending")
     pdf_url = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     paid_at = Column(DateTime, nullable=True)
 
-    # Relationship
     user = relationship("User")
+
+
+class ApiKeyUsage(Base):
+    __tablename__ = "api_key_usage"
+
+    id = Column(Integer, primary_key=True, index=True)
+    api_key_id = Column(Integer, ForeignKey("api_keys.id"), nullable=False)
+    endpoint = Column(String(255), nullable=False)
+    ip_address = Column(String(45), nullable=True)
+    status_code = Column(Integer, nullable=True)
+    duration_ms = Column(Integer, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    api_key = relationship("ApiKey")

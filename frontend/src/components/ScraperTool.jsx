@@ -4,12 +4,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Globe, Search, Layers, Download, Trash2,
   Copy, CheckCircle2, ExternalLink, AlertCircle,
-  Zap, FileText, ArrowRight
+  Zap, FileText, ArrowRight, Check, X, Mail, MapPin
 } from 'lucide-react';
 
 import { useAuth } from '@clerk/clerk-react';
 
-const API_URL = import.meta.env.DEV ? 'http://127.0.0.1:8000' : '/api';
+const API_URL = '/api';
 
 function SocialLink({ platform, href }) {
   return (
@@ -30,7 +30,28 @@ function CopyButton({ text, id, copied, onCopy }) {
   );
 }
 
-function DataSection({ label, icon, items, emptyText, idx, type, copied, onCopy }) {
+function EmailBadge({ email, validEmails, invalidEmails }) {
+  const isValid = validEmails.includes(email);
+  const isInvalid = invalidEmails.includes(email);
+
+  if (isValid) {
+    return (
+      <span className="email-badge email-badge--valid" title="Email valide">
+        <Check size={11} /> Valide
+      </span>
+    );
+  }
+  if (isInvalid) {
+    return (
+      <span className="email-badge email-badge--invalid" title={`Rejeté : ${isInvalid}`}>
+        <X size={11} /> {isInvalid}
+      </span>
+    );
+  }
+  return null;
+}
+
+function DataSection({ label, icon, items, emptyText, idx, type, copied, onCopy, validEmails, invalidEmails }) {
   return (
     <div className="data-section">
       <div className="data-label">
@@ -40,7 +61,12 @@ function DataSection({ label, icon, items, emptyText, idx, type, copied, onCopy 
       {items.length > 0 ? items.map((item, i) => (
         <div key={i} className="data-item">
           <span className="data-item__text">{item}</span>
-          <CopyButton text={item} id={`${type}-${idx}-${i}`} copied={copied} onCopy={onCopy} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            {type === 'email' && (
+              <EmailBadge email={item} validEmails={validEmails || []} invalidEmails={invalidEmails || []} />
+            )}
+            <CopyButton text={item} id={`${type}-${idx}-${i}`} copied={copied} onCopy={onCopy} />
+          </div>
         </div>
       )) : <p className="data-empty">{emptyText}</p>}
     </div>
@@ -48,14 +74,13 @@ function DataSection({ label, icon, items, emptyText, idx, type, copied, onCopy 
 }
 
 function ResultCard({ result, idx, copied, onCopy }) {
-  // Backwards compatibility: check if result is nested within the job object
-  const data = result.result || result;
+  const data = (result.result && typeof result.result === 'object') ? result.result : {};
   const domain = (() => {
     try { return new URL(result.url.startsWith('http') ? result.url : `https://${result.url}`).hostname; }
     catch { return result.url; }
   })();
 
-  const initial = (result.name || domain).charAt(0).toUpperCase();
+  const initial = (result.name || data.name || domain).charAt(0).toUpperCase();
   const isError = result.status?.startsWith('error');
 
   return (
@@ -81,15 +106,23 @@ function ResultCard({ result, idx, copied, onCopy }) {
       </div>
       <div className="result-card__body">
         <DataSection
-          label="Emails" icon={<FileText size={12} />}
+          label="Emails" icon={<Mail size={12} />}
           items={data.emails || []} emptyText="No email found"
           idx={idx} type="email" copied={copied} onCopy={onCopy}
+          validEmails={data.valid_emails || []} invalidEmails={data.invalid_emails || []}
         />
         <DataSection
           label="Phones" icon={<Zap size={12} />}
           items={data.phones || []} emptyText="No phone found"
           idx={idx} type="phone" copied={copied} onCopy={onCopy}
         />
+        {data.addresses && data.addresses.length > 0 && (
+          <DataSection
+            label="Addresses" icon={<MapPin size={12} />}
+            items={data.addresses} emptyText="No address found"
+            idx={idx} type="address" copied={copied} onCopy={onCopy}
+          />
+        )}
       </div>
     </motion.div>
   );
@@ -104,21 +137,21 @@ export default function ScraperTool() {
   const [copied, setCopied] = useState(null);
   const { getToken } = useAuth();
 
-  // Fetch history on mount to persist results between tab changes
-  React.useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const token = await getToken();
-        const res = await axios.get(`${API_URL}/api/v1/scrape/history?page_size=10`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (res.data && res.data.jobs) {
-          setResults(res.data.jobs);
-        }
-      } catch (err) {
-        console.error("Failed to fetch history:", err);
+  const fetchHistory = async () => {
+    try {
+      const token = await getToken();
+      const res = await axios.get(`${API_URL}/v1/scrape/history?page_size=10`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.data && res.data.jobs) {
+        setResults(res.data.jobs);
       }
-    };
+    } catch (err) {
+      console.error("Failed to fetch history:", err);
+    }
+  };
+
+  React.useEffect(() => {
     fetchHistory();
   }, [getToken]);
 
@@ -127,18 +160,18 @@ export default function ScraperTool() {
     if (!urlInput.trim() || loading) return;
     setLoading(true);
     setError('');
-    
+
     try {
       const token = await getToken();
       if (mode === 'single') {
-        const res = await axios.post(`${API_URL}/api/v1/scrape`, { url: urlInput.trim() }, {
+        const res = await axios.post(`${API_URL}/v1/public/scrape`, { url: urlInput.trim() }, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setResults(prev => [res.data, ...prev]);
         setUrlInput('');
       } else {
         const urls = urlInput.split('\n').map(u => u.trim()).filter(Boolean);
-        const res = await axios.post(`${API_URL}/api/v1/scrape-bulk`, { urls }, {
+        const res = await axios.post(`${API_URL}/v1/public/scrape-bulk`, { urls }, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setResults(prev => [...res.data, ...prev]);
@@ -146,7 +179,7 @@ export default function ScraperTool() {
       }
     } catch (err) {
       const detail = err.response?.data?.detail;
-      const errorMsg = Array.isArray(detail) 
+      const errorMsg = Array.isArray(detail)
         ? detail.map(d => `${d.loc.join('.')}: ${d.msg}`).join(', ')
         : (typeof detail === 'string' ? detail : 'Extraction failed.');
       setError(errorMsg);
@@ -163,12 +196,15 @@ export default function ScraperTool() {
 
   const exportCSV = () => {
     const headers = ['Name', 'URL', 'Emails', 'Phones', 'Socials'];
-    const rows = results.map(r => [
-      r.name, r.url,
-      r.emails.join('; '),
-      r.phones.join('; '),
-      Object.entries(r.social_links || {}).map(([k, v]) => `${k}: ${v}`).join('; ')
-    ]);
+    const rows = results.map(r => {
+      const data = (r.result && typeof r.result === 'object') ? r.result : r;
+      return [
+        r.name || data.name, r.url,
+        (data.emails || []).join('; '),
+        (data.phones || []).join('; '),
+        Object.entries(data.social_links || {}).map(([k, v]) => `${k}: ${v}`).join('; ')
+      ];
+    });
     const csv = 'data:text/csv;charset=utf-8,' +
       headers.join(',') + '\n' +
       rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');

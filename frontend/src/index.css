@@ -731,6 +731,10 @@ body {
   box-shadow: 0 0 8px rgba(99, 102, 241, 0.4);
 }
 
+.spin {
+  animation: spin 600ms linear infinite;
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
@@ -1031,11 +1035,204 @@ body {
   background: var(--primary-dim);
 }
 
+/* ─── Email Validation Badges ─── */
+.email-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.email-badge--valid {
+  background: var(--success-dim);
+  color: var(--success-light);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.email-badge--invalid {
+  background: var(--error-dim);
+  color: var(--error-light);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Address Items ─── */
+.data-item--address {
+  background: rgba(6, 182, 212, 0.04);
+  border-left: 2px solid rgba(6, 182, 212, 0.2);
+}
+
+.data-item[data-type="address"] {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .data-empty {
   font-size: 12px;
   color: var(--text-muted);
   padding: 8px 4px;
   font-style: italic;
+}
+
+/* ─── Price & Product Page ─── */
+.price-product-page .glass {
+  border-radius: var(--radius-lg);
+}
+
+.pp-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.pp-table th {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pp-table td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.pp-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.pp-name-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.pp-thumb {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  background: var(--surface-high);
+  padding: 3px;
+  flex-shrink: 0;
+}
+
+.pp-sku {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  background: var(--surface-high);
+  padding: 2px 6px;
+  border-radius: var(--radius-xs);
+}
+
+.pp-price {
+  font-weight: 600;
+  color: var(--success-light);
+  font-size: 0.95rem;
+}
+
+.pp-price.unmatched {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.pp-all-price {
+  display: inline-block;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  padding: 1px 4px;
+  border-radius: 3px;
+  margin: 1px 2px;
+  background: var(--surface-high);
+}
+
+.pp-no-price {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.pp-link {
+  color: var(--primary-light);
+  transition: color 0.15s;
+}
+
+.pp-link:hover {
+  color: var(--primary);
+}
+
+.pp-summary {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface-high);
+  border-radius: var(--radius-sm);
+}
+
+.pp-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.price-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.price-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: var(--surface-high);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+.price-item:hover {
+  background: var(--surface-glass);
+}
+
+.price-amount {
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* Responsive: stack panels on mobile */
+@media (max-width: 900px) {
+  .price-product-page > div[style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 /* ─── Features ─── */

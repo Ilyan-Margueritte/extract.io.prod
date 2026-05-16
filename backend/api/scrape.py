@@ -18,11 +18,14 @@ logger = logging.getLogger(__name__)
 
 from pydantic import BaseModel
 
+
 class ScrapeRequest(BaseModel):
     url: str
 
+
 class BulkScrapeRequest(BaseModel):
     urls: List[str]
+
 
 router = APIRouter(prefix="/scrape", tags=["Scraping"])
 
@@ -40,19 +43,23 @@ def check_user_limits(user: User, db: Session) -> tuple[bool, str]:
     import os
     from datetime import timedelta
 
-    # STRICT CHECK: Must have an active subscription
-    if not user.subscription or user.subscription.status != "active":
-        return False, "Active subscription required. Please upgrade your plan."
+    # STRICT CHECK: Must have an active subscription (skip in dev mode)
+    if os.getenv("APP_ENV") != "development":
+        if not user.subscription or user.subscription.status != "active":
+            return False, "Active subscription required. Please upgrade your plan."
 
     now = datetime.utcnow()
     month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
     # FIX: Use SELECT FOR UPDATE to prevent race conditions during limit check
-    # This locks the user row until the current transaction completes
     db.query(User).filter(User.id == user.id).with_for_update().first()
 
     limits = get_user_limits(user)
+
+    # Skip limits check in development mode
+    if os.getenv("APP_ENV") == "development":
+        return True, ""
 
     # Check monthly scrape limit
     if limits["scrapes_per_month"] != -1:
@@ -147,7 +154,7 @@ async def create_scrape_job(
 
     except Exception as e:
         job.status = "failed"
-        job.error_message = str(e)
+        job.error_message = str(e)[:500]
         job.completed_at = datetime.utcnow()
 
     db.commit()

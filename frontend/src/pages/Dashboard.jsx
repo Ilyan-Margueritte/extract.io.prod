@@ -2,13 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Zap, LayoutDashboard, History, Settings,
-  CreditCard, LogOut, Key, Globe
+  CreditCard, LogOut, Key, Globe,
+  BarChart3, Currency
 } from 'lucide-react';
 import { useUser, useClerk, useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
 import ScraperTool from '../components/ScraperTool';
+import PriceProductPage from '../components/PriceProductPage';
 
-const API_URL = import.meta.env.DEV ? 'http://127.0.0.1:8000' : '/api';
+import ApiKeysPage from '../components/ApiKeysPage';
+
+const API_URL = '/api';
 
 const HistoryView = () => {
   const [jobs, setJobs] = useState([]);
@@ -19,7 +23,7 @@ const HistoryView = () => {
     const fetchHistory = async () => {
       try {
         const token = await getToken();
-        const res = await axios.get(`${API_URL}/api/v1/scrape/history?page_size=20`, {
+        const res = await axios.get(`${API_URL}/v1/scrape/history?page_size=20`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setJobs(res.data.jobs || []);
@@ -160,6 +164,20 @@ export default function Dashboard() {
             active={path === '/dashboard/billing'}
           />
 
+<SidebarLink
+             to="/dashboard/api-keys"
+             icon={<Key size={18} />}
+             label="API Keys"
+             active={path === '/dashboard/api-keys'}
+           />
+
+           <SidebarLink
+             to="/dashboard/prices"
+             icon={<Currency size={18} />}
+             label="Prix & Produits"
+             active={path === '/dashboard/prices'}
+           />
+
           <div style={{ marginTop: '2rem', padding: '0 0.75rem 0.75rem', fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px' }}>Account</div>
           <SidebarLink
             to="/dashboard/settings"
@@ -204,17 +222,24 @@ export default function Dashboard() {
       <main className="dash-content">
         <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2.5rem' }}>
           <div>
-            <h1 style={{ fontSize: '1.75rem', fontWeight: 700 }}>
-              {path.includes('history') ? 'History' :
-                path.includes('billing') ? 'Billing' :
-                  path.includes('settings') ? 'Settings' : 'Workspace'}
-            </h1>
+<h1 style={{ fontSize: '1.75rem', fontWeight: 700 }}>
+               {path.includes('history') ? 'History' :
+                 path.includes('billing') ? 'Billing' :
+                   path.includes('webhooks') ? 'Webhooks' :
+                     path.includes('api-keys') ? 'API Keys' :
+                       path.includes('prices') ? 'Prix & Produits' :
+                         path.includes('settings') ? 'Settings' : 'Workspace'}
+             </h1>
             <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>
-              Welcome back, <strong>{user?.fullName || 'User'}</strong>.
-              {plan === 'PREMIUM'
-                ? <span> Enjoy your <strong>Unlimited</strong> access.</span>
-                : <span> <a href="/pricing" style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>Pay for Premium</a> to start extracting leads.</span>
-              }
+              {path.includes('webhooks') || path.includes('api-keys') ? (
+                <>Manage your <strong>developer tools</strong> integration.</>
+              ) : (
+                <>Welcome back, <strong>{user?.fullName || 'User'}</strong>.
+                {plan === 'PREMIUM'
+                  ? <span> Enjoy your <strong>Unlimited</strong> access.</span>
+                  : <span> <a href="/pricing" style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>Pay for Premium</a> to start extracting leads.</span>
+                }</>
+              )}
             </p>
           </div>
 
@@ -250,6 +275,9 @@ export default function Dashboard() {
             )
           } />
           <Route path="/history" element={<HistoryView />} />
+
+          <Route path="/api-keys" element={<ApiKeysPage />} />
+          <Route path="/prices" element={<PriceProductPage />} />
           <Route path="/billing" element={
             <div className="panel" style={{ padding: '4rem', textAlign: 'center' }}>
               <div style={{ background: 'var(--primary-dim)', width: '64px', height: '64px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
