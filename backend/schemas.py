@@ -1,6 +1,7 @@
 """
 Pydantic schemas for Extract.io SaaS API
 """
+from __future__ import annotations
 from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
 from typing import Optional, List, Dict, Any
 from datetime import datetime
@@ -51,7 +52,7 @@ class UserResponse(BaseModel):
     is_active: bool
     is_verified: bool
     created_at: datetime
-    subscription: Optional["SubscriptionInUser"] = None
+    subscription: Optional[SubscriptionInUser] = None
 
     @property
     def plan(self) -> str:
