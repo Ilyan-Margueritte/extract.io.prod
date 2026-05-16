@@ -111,7 +111,7 @@ async def get_current_user(
         user = db.query(User).filter(User.clerk_id == clerk_id).first()
 
         if not user:
-            # First time user - Fetch full details from Clerk API
+            # Fetch full details from payload and Clerk API
             email = payload.get("email")
             full_name = payload.get("name", "User")
 
@@ -139,23 +139,33 @@ async def get_current_user(
                     if os.getenv("APP_ENV") == "development":
                         print(f"Error fetching user from Clerk: {e}")
 
-            user = User(
-                email=email or f"user_{clerk_id}@clerk.com",
-                clerk_id=clerk_id,
-                full_name=full_name,
-                is_active=True
-            )
+            # Vérifie si un user existe déjà avec cet email (compte existant, clerk_id différent)
+            existing_user = db.query(User).filter(User.email == email).first() if email else None
 
-            # Create free subscription
-            subscription = Subscription(
-                plan="free",
-                status="free"
-            )
-            user.subscription = subscription
+            if existing_user:
+                existing_user.clerk_id = clerk_id
+                existing_user.full_name = full_name
+                existing_user.is_active = True
+                db.commit()
+                db.refresh(existing_user)
+                user = existing_user
+            else:
+                user = User(
+                    email=email or f"user_{clerk_id}@clerk.com",
+                    clerk_id=clerk_id,
+                    full_name=full_name,
+                    is_active=True
+                )
 
-            db.add(user)
-            db.commit()
-            db.refresh(user)
+                subscription = Subscription(
+                    plan="free",
+                    status="free"
+                )
+                user.subscription = subscription
+
+                db.add(user)
+                db.commit()
+                db.refresh(user)
 
         return user
     except HTTPException:
